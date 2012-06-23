@@ -25,7 +25,8 @@ my $np = 0;
 my $write_cmd_log = 1;
 my $pdb2gro;
 my $gromacs_path = "/usr/local/bin";
-my $perl_path    = "/home/ivanam/perlscr/gromacs";
+#my $perl_path    = "/home/ivanam/perlscr/gromacs";
+my $perl_path    = "/Users/ivana/perlscr/gromacs";
 my $mpirun       = "/usr/local/bin/mpirun";
 my ($mdrun, $mdrun_mpi, $grompp);
 my $gromacs_run;
@@ -727,8 +728,6 @@ sub make_fake_top (@){
 ##############################################################################
 sub fix_impl_params (@){
 
-    print "*^^^^^TOOL^****************\n";
-
 
     ($forcefield  eq "amber99sb") 
 	|| die "GB params assumes  amber99sb forcefield ...\n";
@@ -736,18 +735,23 @@ sub fix_impl_params (@){
     my $itpfile = $_[0];
     my %params = ();
 
-
-    $params{"C"} = "         0.172    1      1.554    0.1875    0.72 ; C ";
+    # sp2, all-atom, aromatic
+    $params{"C"}  = "         0.172    1      1.554    0.1875    0.72 ; C";
+    $params{"C*"} = "         0.172    0.012  1.554    0.1875    0.72 ; C";
     $params{"CA"} = "            0.18     1      1.037    0.1875    0.72 ; C";
     $params{"CB"} = "            0.172    0.012  1.554    0.1875    0.72 ; C";
-    $params{"CC"} = "            0.172    1      1.554    0.1875    0.72 ; C";
+    $params{"CC"} = "           0.172    1      1.554    0.1875    0.72 ; C";
+
     $params{"CN"} = "           0.172    0.012  1.554    0.1875    0.72 ; C";
     $params{"CR"} = "           0.18     1      1.073    0.1875    0.72 ; C";
-    $params{"CT"} = "           0.18     1      1.276    0.190     0.72 ; C";
-    $params{"CV"} = "           0.18     1      1.073    0.1875    0.72 ; C ";
+    $params{"CV"} = "           0.18     1      1.073    0.1875    0.72 ; C";
     $params{"CW"} = "           0.18     1      1.073    0.1875    0.72 ; C";
-    $params{"C*"} = "           0.172    0.012  1.554    0.1875    0.72 ; C";
-    $params{"H"} = "            0.1      1      1        0.115     0.85 ; H";
+
+    # sp3 all-atom 
+    $params{"CT"} = "           0.18     1      1.276    0.190     0.72 ; C";
+
+ 
+    $params{"H"} =  "           0.1      1      1        0.115     0.85 ; H";
     $params{"HC"} = "           0.1      1      1        0.125     0.85 ; H";
     $params{"H1"} = "           0.1      1      1        0.125     0.85 ; H";
     $params{"HA"} = "           0.1      1      1        0.125     0.85 ; H";
@@ -756,45 +760,161 @@ sub fix_impl_params (@){
     $params{"HO"} = "           0.1      1      1        0.105     0.85 ; H";
     $params{"HS"} = "           0.1      1      1        0.125     0.85 ; H";
     $params{"HP"} = "           0.1      1      1        0.125     0.85 ; H";
-    $params{"N"} = "            0.155    1      1.028    0.17063   0.79 ; N";
+
+    $params{"N"} =  "           0.155    1      1.028    0.17063   0.79 ; N";
     $params{"NA"} = "           0.155    1      1.028    0.17063   0.79 ; N";
     $params{"NB"} = "           0.155    1      1.215    0.17063   0.79 ; N";
     $params{"N2"} = "           0.16     1      1.215    0.17063   0.79 ; N";
     $params{"N3"} = "           0.16     1      1.215    0.1625    0.79 ; N";
+
     $params{"O"} = "            0.15     1      0.926    0.148     0.85 ; O";
     $params{"OH"} = "           0.152    1      1.080    0.1535    0.85 ; O";
     $params{"O2"} = "           0.17     1      0.922    0.148     0.85 ; O";
     $params{"S"} = "            0.18     1      1.121    0.1775    0.96 ; S";
     $params{"SH"} = "           0.18     1      1.121    0.1775    0.96 ; S";
 
+    # take as identical (Ivana);
+    # these are "united" how did they end up in the same list as all-atom?
+    # sp3
+    $params{"C2"} =  $params{"CT"}; 
+    $params{"C3"} =  $params{"CT"}; 
+    $params{"CH"} =  $params{"CT"}; 
+    $params{"CS"} =  $params{"CT"}; 
+
+    $params{"NT"} =  $params{"N3"}; 
+
     
     `cp $itpfile $itpfile.orig`;
     my @lines = split "\n", `cat $itpfile.orig`;
     my $new_itp = "";
+    my $new_field  =   "[ implicit_genborn_params ]\n".
+	";name    sar      st     pi       gbr       hct\n";
     my $reading = 0;
-
+    my $name;
    
     foreach my $line (@lines) {
+
 	if ( $line =~ /atomtype/ ) {
 	    $reading = 1;
+
 	} elsif ( $reading && $line =~ /\[/ ) {
 	    
 	    # add the hacked gb field;
-	    print $new_itp;exit;
-
+	    $new_itp .= $new_field."\n";
 	    $reading = 0;
 
+	} elsif  ($reading  && $line =~ /\S/ && $line !~ /name/) {  # not empty or a header a header line
+		($name) = split " ", $line;
+		$new_field .= " $name ";
+		if ( defined $params{$name} ) {
+		    $new_field .= $params{$name};
+		} elsif ( defined $params{uc $name} ) {
+		    $new_field .= $params{uc $name};
+		} elsif (  defined $params{uc susbtr $name, 0, 1}  ) {
+		    $new_field .= defined $params{uc susbtr $name, 0, 1} ;
+		} else {
+		    die "GB params for atom type $name not found.\n";
+		}
+		$new_field .= "\n";
+
+		
 	}
 
-	($reading )  && ( $new_itp .= $line."\n");
+	$new_itp .= $line."\n";
+
+	
 
     }
 
+    open (NEW_ITP, ">$itpfile") || die "Cno $itpfile: $!\n";
+    print NEW_ITP $new_itp;
+    close NEW_ITP;
 
-    print $new_itp;
-
-    exit;
-
-
+ 
     return;
 }
+
+
+=pod
+
+Amber Forcefield Atom List
+
+Atom	Description
+C	sp2 carbonyl all-atom carbon and aromatic carbon with hydroxyl substituient in tyrosine
+C*	sp2 aromatic all-atom carbon in 5-membered ring with 1 substituent
+C2	sp3 united carbon with 2 hydrogens
+C3	sp3 united carbon with 3 hydrogens
+CA	sp2 aromatic all-atom carbon in 6-membered ring with 1 substituent
+CB	sp2 aromatic all-atom carbon in junction between 5- and 6-membered rings
+CC	sp2 aromatic all-atom carbon in 5-membered ring with 1 substituent and next to a nitrogen
+CD	sp2 aromatic united carbon in 6-membered ring with 1 hydrogen
+CE	sp2 aromatic united carbon in 5-membered ring between 2 nitrogens and with 1 hydrogen
+CF	sp2 aromatic united carbon in 5-membered ring next to a nitrogen without a hydrogen
+CG	sp2 aromatic united carbon in 5-membered ring next to a N-H
+CH	sp3 united carbon with 1 hydrogen
+CI	sp2 united carbon in 6-membered ring between 2 NC nitrogens
+CJ	sp2 united carbon in pyrimidine at positions 5 or 6
+CK	sp2 aromatic carbon in 5-membered ring between 2 nitrogens and with 1 hydrogen
+CM	sp2 all-atom carbon in pyrimidine at positions 5 or 6
+CN	sp2 aromatic junction all-atom carbon in between 5- and 6-membered rings
+CP	sp2 aromatic united carbon in 5-membered ring between 2 nitrogens and with 1 hydrogen (in HIS)
+CQ	sp2 all-atom carbon in 6-membered ring of purine between two NC nitrogens and with 1 hydrogen
+CR	sp2 aromatic all-atom carbon in 5-membered ring between 2 nitrogens and with 1 hydrogen (in HIS)
+CT	sp3 all-atom carbon with 4 explicit substituents
+CV	sp2 aromatic all-atom carbon in 5-membered ring bonded to 1 N and 1 H
+CW	sp2 aromatic all-atom carbon in 5-membered ring bonded to N-H and 1 H
+H	amide or imino hydrogen
+H2	amino hydrogen in NH2
+H3	hydrogen of lysine or arginine (positively charged)
+HC	explicit hydrogen attached to carbon
+HO	hydrogen in hydroxyl group
+HS	hydrogen attached to sulfur
+HW	hydrogen in water
+LP	lone pair
+N	sp2 nitrogen in amide
+N*	sp2 nitrogen in purine or pyrimidine wiht alkyl group
+N2	sp2 nitrogen in base NH2 group or arginine NH2
+N3	sp3 nitrogen with 4 substituents
+NA	sp2 nitrogen in 5-membered ring with hydrogen attached
+NB	sp2 nitrogen in 5-membered ring with lone pairs
+NC	sp2 nitrogen in 6-membered ring with lone pairs
+NP	
+NT	sp3 nitrogen with 3 substituents
+O	carbonyl oxygen
+O2	carboxyl or phosphate non-bonded oxygen
+OH	alcohol oxygen
+OS	ether or ester oxygen
+OW	water oxygen
+P	phosphorus in phosphate group
+S	sulfur in disulfide linkage or methionine
+SH	sulfur in thiol
+C0	calcium ion (+2)
+IM	chlorine ion (-1)
+CU	copper ion (+2)
+I	Iodine ion (-1)
+MG	Magnesium ion (+2)
+QC	cesium ion (+1)
+QK	potassium ion (+1)
+QL	lithium ion (+1)
+QN	sodium ion (+1)
+QR	rubidium ion (+1)
+CS	sp3 carbon
+AC	alpha-anomeric carbon
+BC	beta-anomeric carbon
+HT	sp3 hydrogen
+AH	alpha-anomeric hydrogen
+BH	beta-anomeric hydrogen
+HY	hydroxyl hydrogen
+OT	hydroxyl oxygen
+OA	alpha-anomeric oxygen
+OB	beta-anomeric oxygen
+OE	ring oxygen
+h$	atom for automatic parameter assignment
+c$	atom for automatic parameter assignment
+n$	atom for automatic parameter assignment
+o$	atom for automatic parameter assignment
+s$	atom for automatic parameter assignment
+p$	atom for automatic parameter assignment
+ospc	in SPC water molecule - used for rattle routine
+otip	in TIP3P water molecule - used for rattle routine
+=cut
