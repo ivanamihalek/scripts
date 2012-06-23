@@ -1,0 +1,91 @@
+
+<html>
+<head>
+<title>Parse_blast.pm</title>
+<meta name="generator" content="perl2html 0.9.2">
+<meta name="date" content="2006-01-23T04:49:29+00:00">
+</head>
+
+<body bgcolor="#FFFFFF">
+<pre width="80"><font color="#B22222">#! /usr/bin/perl -w</font>
+
+$SIMILARITY_IDENTICAL = 95;
+$SIMILARITY_LOWEST_ACCEPTABLE = 60;
+
+<strong><font color="#4169E1">sub parse_blast_8 </font></strong>( @) {
+
+<font color="#4169E1">    my</font> $query_length = shift @_;
+<font color="#4169E1">    my</font> $filename = shift @_;
+<font color="#4169E1">    my</font> (@aux, $chain_name);
+<font color="#4169E1">    my</font> @real_deal = ();
+<font color="#4169E1">    my</font> @model = ();
+<font color="#4169E1">    my</font> @piece = ();
+<font color="#4169E1">    my</font> @model_piece = ();
+<font color="#4169E1">    my</font> %start = ();
+<font color="#4169E1">    my</font> %end = ();
+<font color="#4169E1">    my</font> ($query_id, $subject_id,  $pct_identity, $alignment_length, 
+     $mismatches, $gap_openings, $q_start, $q_end, $s_start, $s_end, $e_value, $bit_score)    = ();
+<font color="#4169E1">    my</font> $blast;
+
+<font color="#4169E1">    open</font> ( IF, <font color="#228B22">"&lt;</font>$filename<font color="#228B22">"</font> ) ||
+	die <font color="#228B22">"From parse_blast_8: Cno </font>$filename<font color="#228B22">: </font>$!<font color="#228B22">.\n"</font>;
+
+<font color="#B22222">    #slurp in the input as a single string</font>
+
+    undef $/;
+    $blast = &lt;IF&gt;;
+    $/ = <font color="#228B22">"\n"</font>;
+<font color="#4169E1">    close</font> IF;
+
+
+<font color="#4169E1">    foreach</font> $line (<font color="#4169E1"> split</font> <font color="#228B22">'\n'</font>, $blast ) {
+	 ($query_id, $subject_id,  $pct_identity, $alignment_length, 
+	 $mismatches, $gap_openings, $q_start, $q_end, $s_start, $s_end, $e_value, $bit_score) =
+<font color="#4169E1">	     split</font> <font color="#228B22">'\s'</font>, $line;
+
+	 @aux =<font color="#4169E1"> split</font> <font color="#228B22">'\|'</font>, $subject_id;
+	 $chain_name = join <font color="#228B22">""</font>, ( lc $aux[$#aux-1], uc $aux[$#aux]);
+	 ( length $chain_name ==4 ||  length $chain_name ==5 ) || 
+	     die <font color="#228B22">"error parsing blastp - expecting PDB names."</font>;
+
+	 $start{$chain_name} = $s_start;
+	 $end{$chain_name}   = $s_end;
+	 
+<font color="#4169E1">	 if</font> ( $alignment_length/$query_length &gt; $SIMILARITY_IDENTICAL/100 ) { 
+<font color="#4169E1">	     if</font> ( $pct_identity &gt; $SIMILARITY_IDENTICAL ) {<font color="#B22222">  # ====&gt; code 1</font>
+<font color="#4169E1">		 push</font> @real_deal, $chain_name;
+		 %is_hi_id{$chain_name} = 1;
+	     }<font color="#4169E1"> elsif</font> ( $pct_identity &gt; $SIMILARITY_LOWEST_ACCEPTABLE) {<font color="#B22222">  # ====&gt; code 2</font>
+<font color="#4169E1">		 push</font> @model, $chain_name;
+		 %is_hi_id{$chain_name} = 0;
+	     } 
+	 }<font color="#4169E1"> else</font> {
+<font color="#4169E1">	     if</font> ( $pct_identity &gt; $SIMILARITY_IDENTICAL ) {<font color="#B22222">  # ====&gt; code 3</font>
+<font color="#4169E1">		 push</font> @piece, $chain_name;
+		 %is_hi_id{$chain_name} = 1;
+	     }<font color="#4169E1"> elsif</font>  ( $pct_identity &gt; $SIMILARITY_LOWEST_ACCEPTABLE){<font color="#B22222">   # ====&gt; code 4</font>
+<font color="#4169E1">		 push</font> @model_piece, $chain_name;
+		 %is_hi_id{$chain_name} = 0;
+	     } 
+	     
+	 }
+    }
+<font color="#4169E1">    if</font> (@real_deal) {
+<font color="#4169E1">	push</font> @unique_chains, shift @real_deal;	
+	@ { $copies{$chain} }  =  (@real_deal, @model, @piece, @model_piece);
+    }<font color="#4169E1"> elsif</font> (@model) {
+<font color="#4169E1">	push</font> @unique_chains, shift @model;	
+	@ { $copies{$chain} }  =  (@real_deal, @model, @piece, @model_piece);	
+    }<font color="#4169E1"> else</font> {
+<font color="#B22222">	# find which nonoverlapping pieces I have to begin with</font>
+<font color="#B22222">	# use the longest real if possible as the original</font>
+    }
+
+    
+}
+
+1;
+</pre>
+</body>
+
+</html>

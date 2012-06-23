@@ -1,0 +1,9 @@
+compiling afa_stats.c:
+gcc -o afa_stats afa_stats.c
+
+other dependencies:
+blastall
+fastacmd
+
+database:
+refseq_genomes

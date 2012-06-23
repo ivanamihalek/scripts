@@ -1,0 +1,47 @@
+#!/bin/csh
+
+set rep_path = /home/i/imihalek/projects/report_maker/modular
+
+echo "**************************"
+echo "**************************"
+echo Q07889   has a domain \(with structure\), and HSSP has a chain different from the  one chosen by blast
+echo "**************************"
+echo "**************************"
+set i = Q07889
+cd $i
+$rep_path/report_maker_3.pl $i
+cat
+cd ..
+
+echo "**************************"
+echo "**************************"
+echo 2a8h    no HSSP
+echo "**************************"
+echo "**************************"
+set i = 2a8h
+cd $i
+$rep_path/report_maker_3.pl $i
+cat
+cd ..
+
+echo "**************************"
+echo "**************************"
+echo 1afv    6 chains, 2x3 - find the right ones in the HSSP
+echo "**************************"
+echo "**************************"
+set i = 1afv
+cd $i
+$rep_path/report_maker_3.pl $i
+cat
+cd ..
+
+echo "**************************"
+echo "**************************"
+echo 2btf    error in the HSP entry \(no chains\)
+echo "**************************"
+echo "**************************"
+set i = 2btf
+cd $i
+$rep_path/report_maker_3.pl $i
+cat
+cd ..

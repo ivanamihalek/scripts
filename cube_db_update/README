@@ -1,0 +1,14 @@
+making new family directory:
+
+ 07_create_new_family.pl
+ 08_find_seqs_for_new_family.pl -- this needs access to afs
+
+then can use  01_mammalian_analysis.pl &  02_all_verts.pl,
+
+but then need to get PDBs, before moving on to 
+
+03_make_vis_sessions.pl &  04_make_downloadables.pl
+
+then again need to generate the html files from scratch
+
+and finally add the link to the db homepage

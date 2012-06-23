@@ -1,0 +1,14 @@
+                                            
+Sub Macro2()
+
+For i = 1 To 2
+For j = 1 To 5
+    Cells(j, i).Select
+    With Selection.Interior
+        .Color = RGB(255, 255, i * 100)
+        .Pattern = xlSolid
+    End With
+Next j
+Next i
+
+End Sub

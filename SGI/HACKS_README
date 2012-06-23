@@ -1,0 +1,93 @@
+*****************
+hack1.pl 
+*****************
+#!/usr/gnu/bin/perl -w
+# 1) find pdb names from "progress" html files
+# the Structural Genomics Intiative sites publish
+# 2) dwonload the pdb file itself (? this does not work
+#    can make it put query as a link in th htle file ...)
+# 3) give the output (names & links) in the html form
+ 
+*****************
+hack2.pl 
+*****************
+# select only the lines  starting with "ATOM" from a pdb file
+# the pdb files are given as a list; the list is supposed to
+# contain the names of the files; the files themselves 
+# should be in the pdbfiles directory; the "stripped" files
+# are saved to atoms directory
+
+*****************
+hack2.2.pl 
+*****************
+# the above too simple minded
+# need to separate unique AA chains from the rest
+# (drop duplicate chains; drop nucleic acid sequences)
+
+*****************
+hack3.pl 
+*****************
+# for all the pdb files passed from
+# stdin create a directory with the
+# same root name (drop ".pdb"), copy  the pdb file
+# to the new directory  and chdir to it,
+#  execute EasyTrace and climb back to the initial directory
+
+
+*****************
+hack4.pl 
+*****************
+# for all the pdb files passed from
+# stdin create a directory with the
+# same root name (drop ".pdb"),  chdir to it,
+#  execute clustalw and TracePlus6.01 and climb back to the initial directory
+# -- assumes EasyTrace has produced *input file for clustalw
+
+*****************
+hack5.pl 
+*****************
+# for all the pdb files passed from
+# stdin create descend to the directory with the
+# same root name and execute TracePlus6.01
+# followed by cluster counting and coloring
+# - do the timing
+
+*****************
+hack5.5.pl 
+*****************
+# for all the pdb files passed from
+# descend to the directory with the
+# same root name; create directory called "nogap"
+# and execute TracePlus6.01 without the -g option,
+# followed by cluster counting and coloring
+
+
+*****************
+hack4.2.pl 
+*****************
+# for all the pdb files passed from
+# stdin  descend to the directory with the
+# same root name and execute clustalw and  TracePlus6.01
+# followed by cluster counting and coloring
+# - do the timing
+
+
+*****************
+hack6.pl 
+*****************
+# for all the pdb files passed from
+# stdin descend to the directory with the
+# same root name and execute StatReports
+# - the file  GlobalForRho4-$i.traceReportSummary 
+# must be present
+
+
+
+****************
+****************
+
+ CURRENT PIPELINE: hack1.pl ---> hack2.2.pl ---> hack3.pl ---> hack4.2.pl ---> hack6.pl
+
+****************
+****************
+    

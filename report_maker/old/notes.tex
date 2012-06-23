@@ -1,0 +1,50 @@
+\section{Notes on using trace results}
+
+ {\bf Coverage.} The trace  results are commonly expressed in terms of coverage: the residue is
+important if its ``coverage'' is small - that is if it belongs to some small top percentage of residues [100\% is
+ all of the residues in a chain], according to trace.
+The ET results are presented  in form of a table, usually with a small number of 
+clustering residues, sorted by the strength of the evolutionary pressure(as we infer it).
+(The smaller the coverage, the stronger the pressure on the residue.) Starting from the top of that list,
+mutating a couple of residues should affect the protein somehow -  how exactly, we should hopefully learn from
+the experiment.
+
+ {\bf Known substitutions.} One of the table columns is ``substitutions''
+- other amino acid types seen at the same position in the alignment. These amino acid types may be interchangeable
+at that position in the protein, so if one wants to affect the protein by a point mutation, they should be avoided.
+For example if the substitutions are ``RVK'' and my original protein has an R at that position, it is advisable to
+try anything, but RVK. To the contrary, if I am looking for substitutions which will {\emph not}  affect the protein,
+I may try replacing, R with K, or more surprisingly, with V. The percentage of times the substitution appears in the
+alignment if given in the immediately following bracket. No percentage is given in the cases when it is smaller than 1.
+This is meant ot be a rough guide - due to rounding errors these percentages often do not add up to 100.
+
+{\bf Surface.} Also, where it may be of interest a column ``surf'' (for surface) appears. It signals that the
+residue is solvent accessible (according to DSSP program) by at least 10\AA$^2$, 
+which is roughly the area  needed for one water molecule
+to come in the contact with the residue. But note that, if our picture of protein evolution is
+correct, the neighboring residues which {\emph do \emph not} stick out directly to the surface might be equally important
+in maintaining the interaction specificity - they should not be automatically dropped from consideration when
+choosing the set for mutagenesis. (Especially if they form  a cluster with the surface residues.)
+
+{\bf Number of contacts.} Another column worth noting is denoted ``noc (bb)'' it tells the number of contacts heavy atoms
+of the residue in question make across the interface, as well as  how many of them are realized through
+the backbone atoms (if all or most contacts are through the backbone, mutation presumably won't have strong impact).
+Two heavy atoms are considered to be ``in contact'' if their centers are closer than $5\AA$.
+
+{\bf Annotation.} If the residue annotation is available (either from the pdb file or from other sources), another column,
+with the header ``annotation'' appears. Annotation carried over from from PDB is the following: 
+site (indicating existence of related  site record in PDB ), ss bond (disulfide bond forming residue),  
+hbond (hydrogen bond forming residue, jbond (james bond forming residue), and salt bridge (for salt bridge
+forming residue).
+
+{\bf Mutation suggestions.} Mutation suggestions are completely heuristic and based on complementarity with the substitutions found
+in the alignment. Note that they are meant to be {\bf disruptive}.
+The attempt is made to complement the following properties: size (small $[AVGSTC]$, medium $[
+LPNQDEMIK]$, large $[WFYHR]$), 
+hydrophobicity (hydrophobic $[LPVAMWFI]$, polar $[GTCY]$), charge (positive $[KHR]$,
+ negative $[DE]$), aromaticity $[WFYH]$, long aliphatic chain \\$[EKRQM]$, 
+ OH-group possession $[SDETY]$, and NH2 group possession $[NQRK]$.
+The suggestions are listed according to how different they appear from the original amino acid, 
+and they are grouped in round bracket   
+if they appear equally good (or rather,equally  destructive) as mutation for the original.
+

@@ -1,0 +1,14 @@
+Changes
+MANIFEST
+Makefile.PL
+README
+SendMail.pm
+test.pl
+demo/README
+demo/SendMail.cgi
+demo/SendMail_cgi.txt
+demo/form.html
+demo/index.htm
+demo/testSendMail.pl
+demo/testSendMail_pl.txt
+demo/welcome.gif

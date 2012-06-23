@@ -1,0 +1,33 @@
+# Ivana, Nov 2001
+# pipeline.pl
+
+# purpose:       Script for running a sequnce of scripts and programs for ET analysis
+#                on a list of provided pdb files; each pdbfile should be in its own
+#                directory with the same pdb name (this can be done using pdbparser.pl).
+#                The idea is to start the whole thing with "ls | pipeline.pl".
+
+
+# dependencies:  EasyT (--> needs: pretrace, ConvertRawToFasta.pl, 
+#                           RetrieveAndClipSequences.pl, blastcl3), 
+#                clustalw, TracePlus6.02, ClusterCounterForTrace, ColorProteinByCluster.pl
+
+# assumptions:   All of the dependencies must be reachable through environmental variable $PATH.
+#                All of the java classes must be placed in $CLASSPATH directory
+#
+# godawful solutions: ClusterCounterForTrace is dependent on a huge library currently in
+#               Hui's directory - I wasn't successfull in moving it from there
+#               (/home/concorde/hy131321/lset/classes )
+
+#  Usage: pipeline.pl [-v e-value] [-s sp] [-e ep] [-d dir] [-n] [-h] 
+#  
+#    -v          Specify e-value to be used in BLAST. Default: $E_VALUE.
+#    -s          Start from the starting point sp in the pipeline.
+#    -e          End at the endpoint ep in the pipeline.
+#                sp and ep can be one of the following:
+#                1 (EasyTrace), 2(clustalw), 3(trace+),
+#                4 (ClusterCounter), 5(ColorByCluster),
+#                6 (GenerateStatReport).
+#    -d          Work in the directory dir.
+#    -n          Do not count gap as 21st AA.
+#    -h          Print this.
+

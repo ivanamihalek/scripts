@@ -1,0 +1,8 @@
+Sub Macro1()
+    Cells (7, 1).Select
+    With Selection.Font
+        .Color = RGB( 255, 0, 0 )
+    End With
+End Sub
+
+

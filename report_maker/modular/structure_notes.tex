@@ -1,0 +1,46 @@
+ \subsection{Known substitutions} One of the table columns is ``substitutions''
+- other amino acid types seen at the same position in the alignment. These amino acid types may be interchangeable
+at that position in the protein, so if one wants to affect the protein by a point mutation, they should be avoided.
+For example if the substitutions are ``RVK'' and the  original protein has an R at that position, it is advisable to
+try anything, but RVK. Conversely, when looking for substitutions which will {\emph not}  affect the protein,
+one may try replacing, R with K, or (perhaps more surprisingly), with V. The percentage of times the substitution appears in the
+alignment is given in the immediately following bracket. No percentage is given in the cases when it is smaller than 1\%.
+This is meant to be a rough guide - due to rounding errors these percentages often do not add up to 100\%.
+
+\subsection{Surface} To detect candidates for novel functional interfaces, first we look for residues
+that are solvent accessible (according to DSSP program) by at least $10\AA^2$, 
+which is roughly the area  needed for one water molecule to come in the contact with the residue.
+ Furthermore, we require that these residues form a ``cluster'' of residues which have 
+ neighbor within  $5\AA$ from any of their heavy atoms.
+
+ Note, however,  that, if our picture of protein evolution is
+correct, the neighboring residues which  \emph {are not} surface accessible might be equally important
+in maintaining the interaction specificity - they should not be automatically dropped from consideration when
+choosing the set for mutagenesis. (Especially if they form  a cluster with the surface residues.)
+
+\subsection{Number of contacts} Another column worth noting is denoted ``noc/bb''; it tells the number of contacts heavy atoms
+of the residue in question make across the interface, as well as  how many of them are realized through
+the backbone atoms (if all or most contacts are through the backbone, mutation presumably won't have strong impact).
+Two heavy atoms are considered to be ``in contact'' if their centers are closer than $5\AA$.
+
+\subsection{Annotation} If the residue annotation is available (either from the pdb file or from other sources), another column,
+with the header ``annotation'' appears. Annotations carried over from PDB are the following: 
+site (indicating existence of related  site record in PDB ), S-S (disulfide bond forming residue),  
+hb (hydrogen bond forming residue, jb (james bond forming residue), and sb (for salt bridge
+forming residue).
+
+{\subsection{Mutation suggestions} \label{mutnotes}
+ Mutation suggestions are completely heuristic and based on complementarity with the substitutions found
+in the alignment. Note that they are meant to be {\bf disruptive} to the interaction of the protein with its ligand.
+The attempt is made to complement the following properties: small $[AVGSTC]$, medium $[
+LPNQDEMIK]$, large $[WFYHR]$, 
+hydrophobic $[LPVAMWFI]$, polar $[GTCY]$; positively $[KHR]$,
+ or negatively $[DE]$ charged, aromatic $[WFYH]$, long aliphatic chain $[EKRQM]$, 
+ OH-group possession $[SDETY]$, and NH2 group possession $[NQRK]$.
+The suggestions are listed according to how different they appear to be from the original amino acid, 
+and they are grouped in round brackets   
+if they appear equally  disruptive. From left to right, each bracketed group of amino acid types
+resembles more strongly the original (i.e. is, presumably, less disruptive)
+These suggestions are tentative - they might prove disruptive to the fold rather than to the interaction.
+Many researcher will choose, however, the straightforward alanine mutations, especially in the
+beginning stages of their investigation.

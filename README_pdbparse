@@ -1,0 +1,33 @@
+
+#!/usr/gnu/bin/perl -w 
+# Ivana, Dec 2001
+# PURPOSE:  select only the lines  starting with "ATOM" from a pdb file;
+# INPUT:    the pdb files should be provided as a list from stdin (piping it from ls will do):
+#           the list is supposed to  contain the names of the pdb  files - the pdb files themselves 
+#           should be in the directory specified as $PDBFILES below; 
+#           for example: "ls pdbfiles | pdbparse.pl" ; 
+#
+# OUTPUT:   the "stripped" files  are saved into a
+#           subdirectory  according to their "type":
+#            
+#           single_chain:    pdbfiles containing single chain of amino acids (AA)
+#           multiple_chains: if the orginal PDB file has repeating chains of the
+#                            same sequence, one  representative chain gets written here
+#           unique_chains:   if the orginal PDB file has several different chains (sequqnces)
+#                            one representative sequence for each is output
+#           nmr:             NMR dtermined strucutres - get only the first model (what if there
+#                            are several chains? )
+#           thry:            theoretical model -- the current lore is that we do not use
+#                            these so I ust make a soft link to the original file - just
+#                            for bookkeeping purposes
+#           unknwn:          files whose format is not recognized, for any reason
+#
+#DEPENDENCIES:  none
+#
+#ASSUMPTIONS:  1) To connect smoothly the output of this program to pipeline.pl
+#               the pdb files should be named according to the following convention:
+#                <pdb_name>.pdb [note that the older pdb files sometimes have the
+#               names formatted according to pdv<pdb_name>.ent]
+#              2) A sequence is termed "short" if it contains less than $CUTOFF_LENGTH
+#                 amino acids. The idea is that these probably won't be interesting
+#                 for pipelining.

@@ -1,0 +1,55 @@
+Module:
+    SendMail
+
+Version:
+    2.09
+
+Description:
+    SendMail will connect to SMTP server directly to send mails.
+
+    This version supports attachments and CGI.pm's file uploading.
+
+    For more information, check the pod document insides the module
+    or check the website.
+
+Notes:
+    This documentation is quite new, feel free to contact me if you
+    got any questions, bugs or comments.
+
+Requirement:
+    You need to install MIME::Base64 and MIME::QuotedPrint modules.
+
+URL:
+    http://www.tneoh.zoneit.com/perl/SendMail/
+
+FAQ:
+    http://www.tneoh.zoneit.com/perl/SendMail/FAQ.html
+
+Build/Installation:
+    Standard build/installation supported by ExtUtils::MakeMaker(3)...
+        perl Makefile.PL
+        make
+        make test
+        make install
+   
+    In Win32 platforms, please take a look at 
+    Where do I get make for Win32?
+    http://www.activestate.com/ActivePerl/docs/perl-win32/perlwin32faq9.html#Where_do_I_get_a_Win32_make
+   
+    If you only have FTP access to your web server, check the index.htm in
+    ./demo directory (in the compressed file).
+
+Demos:
+    Copy ./demo directory to your web server's document root to have a test.
+    And read the index.htm file in that directory.
+
+Copying:
+    Copyright (c) 1998-2003 Simon Tneoh Chee-Boon. All rights reserved.
+    This program is free software; you can redistribute it and/or
+    modify it under the same terms as Perl itself.
+
+Last Modified:
+    04th.March.2003
+
+Author:
+    Simon Tneoh Chee-Boon <tneohcb@pc.jaring.my>

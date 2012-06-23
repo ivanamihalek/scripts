@@ -1,0 +1,392 @@
+
+<html>
+<head>
+<title>report_maker_3.pl</title>
+<meta name="generator" content="perl2html 0.9.2">
+<meta name="date" content="2006-01-23T04:39:05+00:00">
+</head>
+
+<body bgcolor="#FFFFFF">
+<pre width="80"><font color="#B22222">#! /usr/bin/perl -w</font>
+
+<font color="#4169E1">use Process_uniprot;</font>
+<font color="#4169E1">use Pdb;</font>
+<font color="#4169E1">use Report_utils;</font>
+
+
+<strong><font color="#4169E1">sub boot()</font></strong>;
+<strong><font color="#4169E1">sub clusters_text ()</font></strong>;
+<strong><font color="#4169E1">sub count_representatives ()</font></strong>;
+<strong><font color="#4169E1">sub determine_top_pctg ()</font></strong>;
+<strong><font color="#4169E1">sub difference_analysis ()</font></strong>;
+<strong><font color="#4169E1">sub extract_pdb_chains()</font></strong>;
+<strong><font color="#4169E1">sub fctl_surf_process ()</font></strong>;
+<strong><font color="#4169E1">sub find_uniprot ()</font></strong>;
+<strong><font color="#4169E1">sub functional_surface_text ()</font></strong>;
+<strong><font color="#4169E1">sub hypo_surf_text ()</font></strong>;
+<strong><font color="#4169E1">sub input_parse ()</font></strong>;
+<strong><font color="#4169E1">sub ligand_binding ()</font></strong>;
+<strong><font color="#4169E1">sub pdb_uniprot_compare ()</font></strong>;
+<strong><font color="#4169E1">sub primary_seq_text()</font></strong>;
+<strong><font color="#4169E1">sub results_pooling()</font></strong>;
+<strong><font color="#4169E1">sub runET ()</font></strong>;
+<strong><font color="#4169E1">sub seq_selection_by_clustering ()</font></strong>;
+<strong><font color="#4169E1">sub seq_selection_by_bitval ()</font></strong>;
+<strong><font color="#4169E1">sub structure_match ()</font></strong>;
+<strong><font color="#4169E1">sub uniprot_description()</font></strong>;
+<font color="#B22222">############# result pooling ##############</font>
+<strong><font color="#4169E1">sub interface_clusters ()</font></strong>;
+<strong><font color="#4169E1">sub diff_analysis ()</font></strong>;
+
+
+
+
+<font color="#B22222">##############################################</font>
+<font color="#B22222">##############################################</font>
+<font color="#B22222">##############################################</font>
+boot();
+
+@unique_chains = ();
+%copies        = ();
+%sequences     = ();
+%is_hi_id      = ();
+input_parse ();
+
+print <font color="#228B22">"\nreport maker done.\n"</font>;
+
+<font color="#B22222">##############################################</font>
+<font color="#B22222">############################################## </font>
+<font color="#B22222">############################################## </font>
+<strong><font color="#4169E1">sub clusters_text ()</font></strong> { 
+    printf <font color="#228B22">"\tclusters text\n"</font>;
+}
+<font color="#B22222">##############################################</font>
+<strong><font color="#4169E1">sub  determine_top_pctg()</font></strong> { 
+    printf <font color="#228B22">"\tdetermine top pctg\n"</font>;
+    clusters_text ();
+    functional_surface_text ();
+    hypo_surf_text ();
+}
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub difference_analysis ()</font></strong>{
+     printf <font color="#228B22">"\tin dif analysis\n"</font>;
+}
+
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub extract_pdb_chains()</font></strong>{
+
+<font color="#4169E1">    my</font> @chains_in_pdb;
+<font color="#4169E1">    my</font> ($chain, $chain_ret);
+ 
+<font color="#4169E1">    if</font> ( $id_type eq <font color="#228B22">"</font>PDB<font color="#228B22">"</font> ) {
+	$pdbname = $id;
+	pdb_download ($pdbname, $path {<font color="#228B22">"</font>pdb_repository<font color="#228B22">"</font>});
+	$pdb_entry{$pdbname} = `cat  $path{<font color="#228B22">"</font>pdb_repository<font color="#228B22">"</font>}/$pdbname.pdb`;
+	@chains_in_pdb = pdb_chains ($pdbname, <font color="#228B22">""</font>, $pdb_entry{$pdbname});
+<font color="#4169E1">	while</font> ( @chains_in_pdb ) {
+	    $chain = shift @chains_in_pdb;
+	    $sequence{ $chain} = shift @chains_in_pdb;
+	    $is_hi_sim{$chain} = 1;
+	}
+	print <font color="#228B22">"</font>@candidate_chains<font color="#228B22"> \n"</font>;
+
+    }<font color="#4169E1"> else</font> {<font color="#B22222"> # the input was uniprot - we have resolved the chain issues by this point</font>
+<font color="#4169E1">	foreach</font> $chain ( @unique_chains ) {
+<font color="#4169E1">	    foreach</font> $chain2 ( $chain, @{ %copies{$chain} } ) {
+		$pdbname = substr $chain2, 0, 4;
+		$chain_id = substr $chain2, 4, 1;
+		pdb_download ($pdbname, $path {<font color="#228B22">"</font>pdb_repository<font color="#228B22">"</font>});
+		( defined $pdb_entry{$pdbname} &amp;&amp; $pdb_entry{$pdbname} ) ||
+		    ($pdb_entry{$pdbname} = `cat  $path{<font color="#228B22">"</font>pdb_repository<font color="#228B22">"</font>}/$pdbname.pdb`);
+		@chains_in_pdb = pdb_chains ($pdbname, $chain_id, $pdb_entry{$pdbname});
+		$chain_ret = shift @chains_in_pdb;
+		( $chain_ret eq $chain2 ) || die <font color="#228B22">" Error extracting PDB chain:  </font>*$chain_ret<font color="#228B22">* </font>*$chain<font color="#228B22">* "</font>; 
+		$sequence{$chain2} = shift @chains_in_pdb;
+	    }
+	}
+
+    }
+}
+
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub fctl_surf_process ()</font></strong> { 
+    printf <font color="#228B22">"\tin fctl_surf_process\n"</font>;
+<font color="#4169E1">    foreach</font> $current_chain  (@unique_chains) {
+	find_uniprot ();
+    }
+}
+
+<font color="#B22222">##############################################</font>
+<strong><font color="#4169E1">sub find_uniprot ()</font></strong> { 
+    printf <font color="#228B22">"\t</font>find_uniprot<font color="#228B22">\n"</font>;
+<font color="#4169E1">    if</font> ( $id_type eq <font color="#228B22">"</font>PDB<font color="#228B22">"</font> ) {
+	uniprot_description();
+    }
+    seq_selection_by_clustering();
+<font color="#4169E1">    if</font> ($id_type eq <font color="#228B22">"</font>PDB<font color="#228B22">"</font>  &amp;&amp; $pdb_short) {
+	difference_analysis()
+    }
+}
+<font color="#B22222">##############################################</font>
+<strong><font color="#4169E1">sub functional_surface_text ()</font></strong> { 
+    printf <font color="#228B22">"\tfunctional surface text\n"</font>;
+}
+
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub hypo_surf_text ()</font></strong> { 
+    printf <font color="#228B22">"\t</font>hypothetical_surf_text<font color="#228B22">\n"</font>;
+}
+
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub input_parse ()</font></strong> {
+
+<strong><font color="#4169E1">    sub determine_id_type (@)</font></strong>;
+    
+    ( ! @ARGV )  &amp;&amp; die <font color="#228B22">"Usage: report_maker.3.pl   &lt;uniprot or PDB identifier&gt;.\n"</font>;
+
+    $id = shift @ARGV;
+    ($id_type, $main_db_entry) = determine_id_type ($id);
+
+<font color="#B22222">    #push @stack, $my_state;</font>
+<font color="#4169E1">    if</font> ( $id_type eq <font color="#228B22">"</font>PDB<font color="#228B22">"</font> ) {
+	pdb_process();
+    }<font color="#4169E1"> else</font> {
+	uniprot_description();
+    }
+}
+
+
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub pdb_uniprot_compare ()</font></strong> {
+    $pdb_short = ( $length{$current_chain}/$length{$uniprot{$chain}} &lt;  0.8 );
+<font color="#4169E1">    if</font> ( $pdb_short) {
+	seq_selection_by_bitval ();<font color="#B22222"> # un the uniprot sequence</font>
+    } 
+}
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub primary_seq_text ()</font></strong> { 
+    printf <font color="#228B22">"\tprimary seq text\n"</font>;
+<font color="#4169E1">    if</font> ( $structure ) {
+	determine_top_pctg ();
+    }
+}
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub run_ET ()</font></strong> { 
+    printf <font color="#228B22">"\tin run ET\n"</font>;
+    primary_seq_text ();
+}
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub results_pool ()</font></strong> { 
+    printf <font color="#228B22">"\tpooling results\n"</font>;
+}
+
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub seq_selection_by_bitval ()</font></strong> { 
+    printf <font color="#228B22">"\tin bitval\n"</font>;
+    $structure = 0;
+    run_ET ();
+}
+
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub seq_selection_by_clustering ()</font></strong> { 
+    printf <font color="#228B22">"\tin seqsel by clustering\n"</font>;
+    $structure = 1;
+    run_ET(); 
+}
+
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub structure_match ()</font></strong> {
+<font color="#4169E1">    my</font> $chain;
+
+    printf <font color="#228B22">"\tin structure_match\n"</font>;
+    @candidate_chains = process_uniprot ($main_db_entry, $path{<font color="#228B22">"</font>pdbseq<font color="#228B22">"</font>}, $path{<font color="#228B22">"</font>blast<font color="#228B22">"</font>});
+<font color="#4169E1">    if</font> ( @candidate_chains )    {
+<font color="#4169E1">	foreach</font> $chain (@unique_chains) {
+<font color="#4169E1">	    if</font> ( $is_hi_id{$chain} ) {
+		fctl_surf_process ();
+	    }<font color="#4169E1"> else</font> {
+		seq_selection_by_clustering ();
+	    }
+	}
+    }<font color="#4169E1"> else</font> {
+	seq_selection_by_bitval ();
+    }
+
+<font color="#4169E1">   return</font>;
+} 
+
+<font color="#B22222">################################################</font>
+<strong><font color="#4169E1">sub uniprot_description ()</font></strong> { 
+
+    printf <font color="#228B22">"\tin description\n"</font>;
+
+<font color="#4169E1">    if</font> ( $id_type eq <font color="#228B22">"</font>UNIPROT<font color="#228B22">"</font> ) {
+	structure_match ();
+    }<font color="#4169E1"> else</font> {
+       pdb_uniprot_compare ();
+    }
+<font color="#4169E1">    return</font>;
+}
+
+
+
+<font color="#B22222">################################################</font>
+<font color="#B22222">################################################</font>
+<font color="#B22222">################################################</font>
+<font color="#B22222">################################################</font>
+<font color="#B22222">################################################</font>
+
+<strong><font color="#4169E1">sub determine_id_type (@)</font></strong> {
+<font color="#4169E1">    my</font> $id = shift @_;
+<font color="#4169E1">    my</font> $ret;
+<font color="#4169E1">    my</font> $pdb_entry;
+<font color="#4169E1">    my</font> $uniprot_entry;
+
+<font color="#B22222">    # check if pdb </font>
+    $id = uc $id;
+    $ret = `grep $id  $path{<font color="#228B22">"</font>pdbids<font color="#228B22">"</font>}` || <font color="#228B22">""</font>;
+<font color="#4169E1">    if</font> ( $ret ) {
+	print <font color="#228B22">"\t the id </font>$id<font color="#228B22"> is PDB.\n"</font>;
+<font color="#B22222">	# obtain PDB</font>
+	$pdb_entry = <font color="#228B22">""</font>;
+<font color="#4169E1">	return</font> ( <font color="#228B22">"</font>PDB<font color="#228B22">"</font>, $pdb_entry);
+
+    }
+
+<font color="#B22222">    # check if unix</font>
+    $uniprot_entry = `$path{<font color="#228B22">"</font>db_ret<font color="#228B22">"</font>}  $path{<font color="#228B22">"</font>uniprot<font color="#228B22">"</font>}  $id` || <font color="#228B22">""</font>;
+<font color="#4169E1">    if</font> ( $uniprot_entry  &amp;&amp;  $uniprot_entry !~ /not found/ ) {
+	print <font color="#228B22">"\t the id </font>$id<font color="#228B22"> is UNIPROT.\n"</font>;
+<font color="#4169E1">	return</font> ( <font color="#228B22">"</font>UNIPROT<font color="#228B22">"</font>, $uniprot_entry);
+
+    }
+   
+    die <font color="#228B22">"Unrecognized identifier: </font>$id<font color="#228B22">.\n"</font>;
+}
+
+
+<font color="#B22222">####################################################################################</font>
+<font color="#B22222">####################################################################################</font>
+<font color="#B22222">####################################################################################</font>
+<font color="#B22222">####################################################################################</font>
+<font color="#B22222">####################################################################################</font>
+<font color="#B22222">#    BOOTING PROCESS:</font>
+<font color="#B22222">####################################################################################</font>
+<font color="#B22222">####################################################################################</font>
+
+<strong><font color="#4169E1">sub boot ()</font></strong> {
+
+<font color="#B22222">    ################################################################################</font>
+<font color="#B22222">    #</font>
+<font color="#B22222">    #    CONSTANTS</font>
+<font color="#B22222">    #</font>
+<font color="#B22222">    ################################################################################</font>
+
+    $TOO_SHORT  = 50;
+    $TOO_FEW_SEQS  = 10;
+    $evalue     =  1.e-5;
+    $max_gaps       = 0.3;
+    $top_percentage = 25;
+    $top_percentage_surface = 25;
+    $max_cvg        = $top_percentage/100;
+    $max_cvg_surface = $top_percentage_surface/100;
+    $CUTOFF_SURF_CLUSTER = 5;
+    $HOME = <font color="#228B22">"/home/i/imihalek"</font>;
+    $home = `pwd`; chomp $home;
+
+<font color="#B22222">    ################################################################################</font>
+<font color="#B22222">    #</font>
+<font color="#B22222">    #    CHECK FOR DEPENDENCIES</font>
+<font color="#B22222">    #</font>
+<font color="#B22222">    ################################################################################</font>
+
+<font color="#B22222">    # databases</font>
+    $path {<font color="#228B22">"</font>uniprot<font color="#228B22">"</font>}         =   <font color="#228B22">"/home/pine/databases/uniprot_dbm/uniprot_dbm.dat"</font>;
+    $path {<font color="#228B22">"</font>var2uni<font color="#228B22">"</font>}         =   <font color="#228B22">"/home/pine/databases/var2uniprot"</font>;
+    $path {<font color="#228B22">"</font>pdb_repository<font color="#228B22">"</font>}  = <font color="#228B22">"/home/pine/pdbfiles"</font>;
+    $path{<font color="#228B22">"</font>pdbseq<font color="#228B22">"</font>}           =   <font color="#228B22">"/home/pine/databases/pdbseq/pdbaa"</font>;  
+    $path{<font color="#228B22">"</font>pdbids<font color="#228B22">"</font>}           =   <font color="#228B22">"/home/pine/databases/pdbseq/pdbaa.pdb_ids"</font>;  
+
+<font color="#B22222">    # programs  and scripts</font>
+    $path{<font color="#228B22">"</font>alistat<font color="#228B22">"</font>}           = <font color="#228B22">"/home/protean2/current_version/bin/linux/alistat"</font>;
+    $path{<font color="#228B22">"</font>blast<font color="#228B22">"</font>}             = <font color="#228B22">"</font>$HOME<font color="#228B22">/bin/blast/blastall"</font>;
+    $path{<font color="#228B22">"</font>clustalw<font color="#228B22">"</font>}          = <font color="#228B22">"/home/protean2/LSETtools/bin/linux/clustalw"</font>;
+    $path{<font color="#228B22">"</font>cluster2tex<font color="#228B22">"</font>}       = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/translation/cluster2textable.pl"</font>;
+    $path{<font color="#228B22">"</font>color_by_cluster<font color="#228B22">"</font>}  = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/pdb_manip/cbc.pl"</font>;
+    $path{<font color="#228B22">"</font>color_by_coverage<font color="#228B22">"</font>} = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/pdb_manip/cbcvg.pl"</font>;
+    $path{<font color="#228B22">"</font>if_cont<font color="#228B22">"</font>}           = <font color="#228B22">"</font>$HOME<font color="#228B22">/c-utils/if_cont"</font>; 
+    $path{<font color="#228B22">"</font>java<font color="#228B22">"</font>}              = <font color="#228B22">"/home/protean5/ires/local/j2sdk1.4.1_02/bin/java"</font>;
+    $path{<font color="#228B22">"</font>db_ret<font color="#228B22">"</font>}            = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/database/db_retrieve.pl"</font>;
+    $path{<font color="#228B22">"</font>dssp<font color="#228B22">"</font>}              = <font color="#228B22">"/home/protean2/current_version/bin/linux//dssp"</font>; 
+    $path{<font color="#228B22">"</font>etc<font color="#228B22">"</font>}               = <font color="#228B22">"</font>$HOME<font color="#228B22">/code/etc/wetc"</font>;
+    $path{<font color="#228B22">"</font>extract_clusters<font color="#228B22">"</font>}  = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/pdb_manip/extract_clusters.pl"</font>;   
+    $path{<font color="#228B22">"</font>extract_descr<font color="#228B22">"</font>}     = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/var_ID_descr.pl"</font>; 
+    $path{<font color="#228B22">"</font>hssp_download<font color="#228B22">"</font>}     = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/downloading/hsspdownload.pl"</font>; 
+    $path{<font color="#228B22">"</font>hssp2msf<font color="#228B22">"</font>}          = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/translation/hssp2msf.pl"</font>; 
+    $path{<font color="#228B22">"</font>extract_nmr_model<font color="#228B22">"</font>} = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/pdb_manip/extract_nmr_model.pl"</font>;
+    $path{<font color="#228B22">"</font>fasta_cleanup<font color="#228B22">"</font>}     = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/fasta_manip/cleanup_fasta.pl"</font>; 
+    $path{<font color="#228B22">"</font>find_ligands<font color="#228B22">"</font>}      = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/pdb_manip/find_ligands.pl"</font>; 
+    $path{<font color="#228B22">"</font>geom_epitope<font color="#228B22">"</font>}      = <font color="#228B22">"</font>$HOME<font color="#228B22">/c-utils/geom_epitope"</font>; 
+    $path{<font color="#228B22">"</font>geom_center<font color="#228B22">"</font>}       = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/pdb_manip/geom_ctr.pl"</font>; 
+    $path{<font color="#228B22">"</font>muscle<font color="#228B22">"</font>}            = <font color="#228B22">"</font>$HOME<font color="#228B22">/downloads/muscle3.6/muscle"</font>;
+    $path{<font color="#228B22">"</font>pdb_cluster<font color="#228B22">"</font>}       = <font color="#228B22">"</font>$HOME<font color="#228B22">/c-utils/pdb_clust/pc"</font>; 
+    $path{<font color="#228B22">"</font>pdb_parse<font color="#228B22">"</font>}         = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/pdb_manip/pdbparse.pl"</font>; 
+    $path{<font color="#228B22">"</font>pdb_point_place<font color="#228B22">"</font>}   = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/pdb_manip/pdb_point_place.pl"</font>; 
+    $path{<font color="#228B22">"</font>pdb_rename<font color="#228B22">"</font>}        = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/pdb_manip/pdb_chain_rename.pl"</font>; 
+    $path{<font color="#228B22">"</font>pymol<font color="#228B22">"</font>}             = <font color="#228B22">"/home/pine/pymol/pymol.com"</font>;
+    $path{<font color="#228B22">"</font>slct_hom_region<font color="#228B22">"</font>}   = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/fasta_manip/select_homology_region.pl"</font>;
+    $path{<font color="#228B22">"</font>seq_painter<font color="#228B22">"</font>}       = <font color="#228B22">"</font>$HOME<font color="#228B22">/java-utils/SeqReport.class"</font>; 
+    $path{<font color="#228B22">"</font>serial_etc<font color="#228B22">"</font>}        = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/report_maker/serial_etc.pl"</font>;
+    $path{<font color="#228B22">"</font>serial_etc_for_hssp<font color="#228B22">"</font>} = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/report_maker/serial_etc_for_hssp.pl"</font>;
+    $path{<font color="#228B22">"</font>slab<font color="#228B22">"</font>}              = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/pdb_manip/slab_plane.pl"</font>; 
+    $path{<font color="#228B22">"</font>suggest<font color="#228B22">"</font>}           = <font color="#228B22">"</font>$HOME<font color="#228B22">/perlscr/suggest_mutations.pl"</font>; 
+    $path{<font color="#228B22">"</font>texfiles<font color="#228B22">"</font>}          = <font color="#228B22">"</font>$HOME<font color="#228B22">/projects/report_maker"</font>;
+
+
+<font color="#B22222">    # check if all paths ok</font>
+<font color="#4169E1">    foreach</font> $program ( keys %path) {
+	( -e $path{$program} ) || die <font color="#228B22">"</font>$path<font color="#228B22">{</font>$program<font color="#228B22">} not found.\n"</font>;
+    }
+    print <font color="#228B22">"paths OK.\n"</font>;
+
+<font color="#B22222">    #alias for clustalw</font>
+    $path{<font color="#228B22">"</font>clustalw<font color="#228B22">"</font>}          .= <font color="#228B22">" -output= gcg -quicktree"</font>;
+<font color="#B22222">    #alias for the seq painter</font>
+    $path{<font color="#228B22">"</font>seq_painter<font color="#228B22">"</font>}       = $path{<font color="#228B22">"</font>java<font color="#228B22">"</font>}.<font color="#228B22">" -classpath .:/</font>$HOME<font color="#228B22">/java-utils/:/</font>$HOME<font color="#228B22">/java-utils/epsgraphics.jar SeqReport"</font>;
+
+<font color="#B22222">    ################################################################################</font>
+<font color="#B22222">    #</font>
+<font color="#B22222">    #    CREATE DIRECTORY WITH TEXFILES</font>
+<font color="#B22222">    #</font>
+<font color="#B22222">    ################################################################################</font>
+
+
+<font color="#B22222">    #set LaTex search  path </font>
+    $ENV{<font color="#228B22">'TEXINPUTS'</font>} = <font color="#228B22">".:"</font>.$path{<font color="#228B22">"</font>texfiles<font color="#228B22">"</font>}.<font color="#228B22">":"</font>;
+
+    ( -e <font color="#228B22">"</font>texfiles<font color="#228B22">"</font> ) || `mkdir texfiles`;
+ 
+    @texfiles = ( <font color="#228B22">"</font>header.tex<font color="#228B22">"</font>, <font color="#228B22">"</font>notes.tex<font color="#228B22">"</font>, <font color="#228B22">"</font>appendix.tex<font color="#228B22">"</font>, <font color="#228B22">"</font>tailer.tex<font color="#228B22">"</font>);
+    @pics = (<font color="#228B22">"</font>colorbar.eps<font color="#228B22">"</font>);
+<font color="#4169E1">    foreach</font> $file ( @texfiles, @pics ) {
+	(  -e <font color="#228B22">"texfiles/</font>$file<font color="#228B22">"</font> ) || `ln -s  $path{<font color="#228B22">"</font>texfiles<font color="#228B22">"</font>}/$file texfiles/$file`;
+	(  -e <font color="#228B22">"texfiles/</font>$file<font color="#228B22">"</font> ) || die <font color="#228B22">"Error locating/copying </font>$file<font color="#228B22">."</font>;
+    } 
+    print <font color="#228B22">"tex files and pic   OK.\n"</font>;
+
+    @texfiles = ();<font color="#B22222"> # reorganize</font>
+<font color="#4169E1">    push</font> @texfiles, <font color="#228B22">"</font>header.tex<font color="#228B22">"</font>;
+    ( -e <font color="#228B22">"texfiles/descr.tex"</font> )  || (  `touch texfiles/descr.tex`);
+<font color="#4169E1">    push</font> @texfiles,  <font color="#228B22">"</font>descr.tex<font color="#228B22">"</font>;
+<font color="#4169E1">    push</font> @texfiles, <font color="#228B22">"</font>notes.tex<font color="#228B22">"</font>;
+<font color="#B22222">    #             the rest of the sections will be pushed on as they are created</font>
+
+    @attachments = ();<font color="#B22222"> # keep track of things which need to be attached</font>
+    %attachment_description = (); 
+}
+
+
+</pre>
+</body>
+
+</html>

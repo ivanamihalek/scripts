@@ -1,0 +1,170 @@
+<html>
+<head>
+<title>SendMail.pm Version 2.09 Demonstration Page</title>
+</head>
+<body bgcolor="white">
+<h2>SendMail.pm Version 2.09 Demonstration Page</h2>
+<b>Last Modified: 04th.March.2003</b><p>
+<a href='http://www.tneoh.zoneit.com/perl/SendMail/FAQ.html'>FAQ For SendMail.pm</a>
+<hr>
+<blockquote>
+<h3>Normal Perl Script Testing</h3><p>
+<ol>
+<li>Make sure <b>SendMail</b>, <b>MIME::Base64</b> and
+<b>MIME::QuotedPrint</b> modules are installed.
+<li>Check <a href="./testSendMail_pl.txt">testSendMail.pl</a> for 
+modifications that you need to do. And <a href="./welcome.gif">welcome.gif</a> 
+is in this directory.
+<li>Run the script in command line. ("<font color='blue'>perl testSendMail.pl</font>"
+in unix system.)
+<li>If <b>SendMail.pm</b> is not in the standard search 
+path of <b>perl</b>, add the following line to the top of the
+<a href="SendMail_cgi.txt">SendMail.cgi</a> script:
+<blockquote>
+<font color='blue'>use lib 
+qw(/path/of/directory/where/this/SendMail.pm/is/saved);</font><br>
+OR<br>
+<font color='blue'>BEGIN { push(@INC, 
+"/path/of/directory/where/this/SendMail.pm/is/saved"); }</font>
+</blockquote>
+Or just run the command:<blockquote>
+<font color='blue'>perl 
+-I/path/of/directory/where/this/SendMail.pm/is/saved testSendMail.pl</font>
+</blockquote>
+For <b>MIME::Base64</b> and <b>MIME::QuotedPrint</b>, change the path to:
+<font color='blue'>/path/of/directory/where/MIME/directory/is</font><br>
+(Not where <b>Base64.pm</b> and <b>QuotedPrint.pm</b> are.)
+</blockquote>
+</ol>
+</blockquote>
+
+
+
+<hr>
+
+
+
+<blockquote>
+<h3>Perl CGI Testing</h3><p>
+<ol>
+<li>Make sure <b>SendMail</b>, <b>MIME::Base64</b> and
+<b>MIME::QuotedPrint</b> modules are installed.
+<li>Check <a href="./SendMail_cgi.txt">SendMail.cgi</a> for 
+modifications that you need to do. And <a href="./welcome.gif">welcome.gif</a> 
+is in this directory.
+<li>Change the file mode of <a href="./SendMail_cgi.txt">SendMail.cgi</a> 
+to be <b>executable</b>.
+("<font color='blue'>chmod 755 SendMail.cgi</font>" in unix system.)
+<li>Go to <a href="./form.html">Testing Page For SendMail.cgi</a> to do a test.
+Very simple, just fill in the form and submit it, you will see the result.
+<li>If <b>SendMail.pm</b> is not in the standard search 
+path of <b>perl</b>, add the following line to the top of the
+<a href="SendMail_cgi.txt">SendMail.cgi</a> script:
+<blockquote>
+<font color='blue'>use lib 
+qw(/path/of/directory/where/this/SendMail.pm/is/saved);</font><br>
+OR<br>
+<font color='blue'>BEGIN { push(@INC, 
+"/path/of/directory/where/this/SendMail.pm/is/saved"); }</font>
+</blockquote>
+For <b>MIME::Base64</b> and <b>MIME::QuotedPrint</b>, change the path to:
+<font color='blue'>/path/of/directory/where/MIME/directory/is</font><br>
+(Not where <b>Base64.pm</b> and <b>QuotedPrint.pm</b> are.)
+</ol>
+</blockquote>
+
+
+
+<hr>
+
+
+<blockquote>
+<h3>Perl CGI Testing Without Telnet Access</h3><p>
+<ol>
+<li>Upload the files in this directory into your web server.
+<li>Upload <b>SendMail.pm</b> into the same directory.
+<li>Upload <b>Base64.pm</b> and <b>QuotedPrint.pm</b> into sub directory
+called "<b>MIME</b>" if these modules are not installed.
+<li>Make sure <a href="./SendMail_cgi.txt">SendMail.cgi</a> is executable.
+<li>Go to <a href="./form.html">Testing Page For SendMail.cgi</a> to do a test.
+Very simple, just fill in the form and submit it, you will see the result.
+</ol>
+</blockquote>
+<hr>
+<blockquote>
+<h3>Possible Errors</h3><p>
+<ol>
+<li>Path of <b>perl</b> is not correct at the first line of the script.
+Get the correct path from your web administrator.
+<li><b>SendMail.pm</b> is not inside the <b>perl</b>'s search path directories.
+Add the following line to the top of the
+<a href="SendMail_cgi.txt">SendMail.cgi</a> script:
+<blockquote>
+<font color='blue'>use lib
+qw(/path/of/directory/where/this/SendMail.pm/is/saved);</font><br>
+OR<br>
+<font color='blue'>BEGIN { push(@INC,
+"/path/of/directory/where/this/SendMail.pm/is/saved"); }</font>
+</blockquote>
+For <b>MIME::Base64</b> and <b>MIME::QuotedPrint</b>, change the path to:
+<font color='blue'>/path/of/directory/where/MIME/directory/is</font><br>
+(Not where <b>Base64.pm</b> and <b>QuotedPrint.pm</b> are.)
+<li>You have not selected your <b>SMTP</b> server or the server that you run
+your script at doesn't have a <b>SMTP</b> server running on it.
+<li>Relaying denied, most of the <b>SMTP</b> servers don't support relaying
+to avoid spamming. You really need to find one for your script.
+<li><b>MIME::Base64</b> and <b>MIME::QuotedPrint</b> are not installed.
+</ol>
+</blockquote>
+
+<hr>
+<blockquote>
+<center>
+<table width=300 cellspacing=0 cellpadding=0 border=0>
+      <tr>
+       <td><img src="http://www.cgi-resources.com/images/rate/remote_red.gif" width=300 height=11 
+                alt="Rate this Script @ The CGI Resource Index!"></td></tr>
+     </table><table width=300 cellspacing=0 cellpadding=0 border=0>
+      <tr>
+       <td width=20> </td>
+       <td width=260 bgcolor=#FF3232>
+        <center><table border=0 cellpadding=0 cellspacing=0>
+         <tr>
+          <td><form method=POST action="http://cgi-resources.com/rate/index.cgi">
+             <input type=hidden name="referer" value="http://cgi-resources.com/">
+             <input type=hidden name="link_code" value="01980">
+             <input type=hidden name="category_name" 
+              value="Programs and Scripts/Perl/Form Processing/">
+             <input type=hidden name="link_name" 
+              value="SendMail.cgi">
+              <font face="Verdana,Arial,Helvetica" size=-1><b>Script Rating: </b>
+              </font> <select name="rating">
+               <option selected>--
+               <option>10
+               <option>9
+               <option>8
+               <option>7
+               <option>6
+               <option>5
+               <option>4
+               <option>3
+               <option>2
+               <option>1
+               </select> 
+          </td>
+          <td valign=center>
+           <input type=image src="http://www.cgi-resources.com/images/rate/remote_red_sub.gif" width=59 
+                  height=18 alt="Rate It!" border=0></td></tr>
+        </table></center></td>
+       <td width=20> </td>
+      </tr>
+     </table><table width=300 cellspacing=0 cellpadding=0 border=0>
+      <tr><td colspan=3 width=300><img src="http://www.cgi-resources.com/images/rate/remote_red_bot.gif" 
+                               width=300 height=11></td></tr>
+     </table></form>
+</center>
+For any comments, bugs or questions, you are welcome to send an email to
+<a href="mailto:tneohcb@pc.jaring.my">tneohcb@pc.jaring.my</a>.
+</blockquote>
+</body>
+</html>
