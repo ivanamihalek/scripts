@@ -25,8 +25,8 @@ my $np = 0;
 my $write_cmd_log = 1;
 my $pdb2gro;
 my $gromacs_path = "/usr/local/bin";
-#my $perl_path    = "/home/ivanam/perlscr/gromacs";
-my $perl_path    = "/Users/ivana/perlscr/gromacs";
+my $perl_path    = "/home/ivanam/perlscr/gromacs";
+#my $perl_path    = "/Users/ivana/perlscr/gromacs";
 my $mpirun       = "/usr/local/bin/mpirun";
 my ($mdrun, $mdrun_mpi, $grompp);
 my $gromacs_run;
@@ -780,10 +780,20 @@ sub fix_impl_params (@){
     $params{"C3"} =  $params{"CT"}; 
     $params{"CH"} =  $params{"CT"}; 
     $params{"CS"} =  $params{"CT"}; 
+    $params{"CD"} =  $params{"CA"}; # should united atome appear here at all ...?
+    $params{"CP"} =  $params{"CA"};
+    $params{"CX"} =  $params{"CT"}; # CX - tip of that funny three-membered ring
 
-    $params{"NT"} =  $params{"N3"}; 
+    $params{"NT"} =  $params{"N3"}; # sp3 nitrogen with 4 substituents
+    $params{"NH"} =  $params{"N2"}; # sp2 nitrogen in base NH2 group or arginine NH2
+    $params{"N*"} =  $params{"N2"}; # sp2 nitrogen in base NH2 group or arginine NH2
+    $params{"ND"} =  $params{"N"};  # sp2 nitrogen in amide
+    $params{"HN"} =  $params{"H"};  # amide or imino hydrogen
 
+
+    $params{"OS"} =  $params{"OH"}; # sther or esther O params  replaced by alcohol
     
+   
     `cp $itpfile $itpfile.orig`;
     my @lines = split "\n", `cat $itpfile.orig`;
     my $new_itp = "";
@@ -808,10 +818,13 @@ sub fix_impl_params (@){
 		$new_field .= " $name ";
 		if ( defined $params{$name} ) {
 		    $new_field .= $params{$name};
+
 		} elsif ( defined $params{uc $name} ) {
 		    $new_field .= $params{uc $name};
-		} elsif (  defined $params{uc susbtr $name, 0, 1}  ) {
-		    $new_field .= defined $params{uc susbtr $name, 0, 1} ;
+
+		#} elsif (  defined $params{uc substr $name, 0, 1}  ) {
+		#    $new_field .= defined $params{uc substr $name, 0, 1} ;
+
 		} else {
 		    die "GB params for atom type $name not found.\n";
 		}

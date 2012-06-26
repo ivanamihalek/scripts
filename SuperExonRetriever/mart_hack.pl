@@ -48,18 +48,26 @@ sub process() {
    foreach $transcript ( keys %exons ) {
 
        $length = 0;
+       $number_of_exons = scalar @{$exons{$transcript}};
+
        foreach  $exon_range(@{$exons{$transcript}}) {
 
 	   ($from, $to) = split " ", $exon_range;
 	   $length += abs ($to - $from + 1);
 
-	   if ( $length > $longest) {
-	       $longest = $length;
-	       $longest_info =  "$gene    $transcript     $protein{$transcript}    $length \n";
-	   }
+       }
+
+       if ( $length > $longest) {
+	   $longest = $length;
+	   #$longest_info =  "$gene    $transcript     $protein{$transcript}    $length \n";
+	   $longest_info =  "$protein{$transcript}    $number_of_exons\n";
+       }
+
+       if ( `grep $protein{$transcript} prot_output.txt` ) {
+	   print "$protein{$transcript}    $number_of_exons\n";
        }
    }
-   print $longest_info;
+   #print $longest_info;
 
    return;
  

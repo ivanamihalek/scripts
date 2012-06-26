@@ -8,9 +8,9 @@ while ( <> ) {
 
 
 while ( <> ) {
-    $num = substr $_, 0 , 5;
+    #$num = substr $_, 0 , 5;
+    $res = substr $_, 5 , 5;
     $acc = substr $_,35, 3;
-    if ( $acc >= 2) {
-	print "$num    $acc \n";
-    }
+    print "$res\t$acc\n";
+    
 }
