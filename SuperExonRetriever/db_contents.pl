@@ -29,7 +29,6 @@ $rc=$sth->finish;
 
 foreach $table (@tables) {
 
-    print "$table\n";
     $query = "SHOW COLUMNS FROM $table;";
     one_line_query ();
 

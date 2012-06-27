@@ -84,22 +84,27 @@ if (!@ref_exon_ids) {
 
 #####################################################################
 # ensembl exons for the remaining species
-$query = "SELECT ensembl_id FROM exon ".
+$query = "SELECT ensembl_id, start, stop FROM exon ".
 	    "WHERE ref_protein_id='$protid' ".
 	    "AND species='$qry_species' ".
 	    "AND source='ensembl'";
 
 $sth = prepare_and_exec($query);
-@qry_exon_ids = ();
-while(@row = $sth->fetchrow_array) {
-    push @qry_exon_ids, @row;
-}
+($qry_exon_id, $qry_exon_from, $qry_exon_to) = ();
+
+while(  ($qry_exon_id, $qry_exon_from, $qry_exon_to)  = $sth->fetchrow_array ) {
+    push @qry_exon_ids, $qry_exon_id;
+    $qry_from{$qry_exon_id} = $qry_exon_from;
+    $qry_to{$qry_exon_id}   = $qry_exon_to;
+}    
+
 
 $rc = $sth->finish;
-foreach $ref_exon_id ( @ref_exon_ids ) {
-    print "$ref_exon_id \n";
+foreach $qry_exon_id ( @qry_exon_ids ) {
+    print "   $qry_exon_id    $qry_from{$qry_exon_id}   $qry_to{$qry_exon_id}\n";
 }
 
+exit;
 
 
 #####################################################################
