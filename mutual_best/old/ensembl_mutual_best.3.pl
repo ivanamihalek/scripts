@@ -1,10 +1,8 @@
 #! /usr/bin/perl
-#! /usr/bin/perl
 
 sub genome2name (@);
 sub extract_first_seq (@);
 sub find_by_blasting (@);
-sub set_mammals ();
 
 ################################################
 ################################################
@@ -15,12 +13,13 @@ sub set_mammals ();
 ################################################
 $blast    = "/usr/bin/blastall";
 $fastacmd = "/usr/bin/fastacmd";
-$mafft    =  "/usr/local/bin/mafft";
+
 
 ################################################
 ################################################
 
-$ensembl_path  = "/mnt/ensembl/release-67/fasta";
+$ensembl_path  = "/afs/bii.a-star.edu.sg/dept/biomodel_design/Group/ivana/databases/ensembl";
+
 
 ################################################
 #  input negotiation
@@ -34,47 +33,39 @@ $name_tag = "";
 (@ARGV > 4) && ($name_tag = $ARGV[4]);
 
 
-$orig_genome_abinit = "/mnt/ensembl/release-67/fasta/homo_sapiens/pep/Homo_sapiens.GRCh37.67.pep.abinitio.fa";
-$orig_genome_known  = "/mnt/ensembl/release-67/fasta/homo_sapiens/pep/Homo_sapiens.GRCh37.67.pep.all.fa";
+@tax_groups = ("mammals", "other_vertebrates", "invertebrates");
+$tax_group = "";
+
+
+
+foreach (@tax_groups) {
+    (-e "$ensembl_path/known/$_/$orig_genome" || 
+     -e "$ensembl_path/abintio/$_/$orig_genome")  || next;
+
+    $tax_group = $_;
+    
+}
+
+($tax_group) || die "$orig_genome not found in $ensembl_path/known ".
+    "or $ensembl_path/abintio.\n";
+
+$genome_path        = "$ensembl_path/known/$tax_group";
+$all_list_known     = "$genome_path/species";
+$abinit_genome_path = "$ensembl_path/abinitio/$tax_group";
+$all_list_abinit    = "$abinit_genome_path/species";
 
 
 ################################################
 #  check if we have everything that we need
 #
-foreach ($seqfile, $ensembl_path,  
-	 $blast, $fastacmd, $orig_genome_abinit, $orig_genome_known,
-	 $mafft) {
+foreach ($seqfile, $all_list_known, $blast, $fastacmd) {
     (-e $_) || die "$_ not found.\n";
 }
 
 
-$blast .= " -p blastp -e 1.e-2  -m 8 -a 4"; # 8 == output in a tabular format; -a 4  = 4 cpus
+$blast .= " -p blastp -e 1.e-2  -m 8 "; # 8 == output in a tabular format
 
-
-@mammals = ();
-set_mammals();
-
-@species = @mammals;
-
-$here = `pwd`; chomp $here;
-foreach $species (@species) {
-
-
-    $dir = "/mnt/ensembl/release-67/fasta/$species/pep";
-    (-e $dir ) || die "$dir not found\n";
-    
-    chdir $dir;
-    $known{$species} = `ls *all.fa`; chomp $known{$species};
-    $abinit{$species} = `ls *abinitio.fa`; chomp $abinit{$species};
-    chdir $here;
-
-    $known{$species} || die "known genome not found for $species\n";
-    $abinit{$species} || die "abinit genome not found for $species\n";
- 
-    $known{$species}  = "$dir/".$known{$species};
-    $abinit{$species} = "$dir/".$abinit{$species};
-}
-
+@genomes = split "\n", `cat $all_list_known`;
 
 
 ################################################
@@ -86,13 +77,11 @@ for ($descrfile, $fastafile) {
 }
 
 if ( $name_tag ) {
-    $logfile = "ensembl_$name_tag.log";
+    $logfile = "ensembl_$tax_group\_$name_tag.log";
 } else {
-    $logfile = "ensembl.log";
+    $logfile = "ensembl_$tax_group.log";
 }
 open (LOG, ">$logfile") || die "Cno $logfile: $!.\n";
-open (ERR, ">errlog")   || die "Cno errlog: $!.\n";
-
 
 
 ##################################################################
@@ -102,13 +91,8 @@ open (ERR, ">errlog")   || die "Cno errlog: $!.\n";
 
 $outfile    = "tmp.fasta";
 @orig_search_ids = ();
-@orig_search_ids = find_by_blasting($orig_genome_known, $seqfile, $blast, $outfile);
-if  (! @orig_search_ids) {
-    
-    `rm -f tmp*`;
-     print ERR "$seqfile does not exist in $orig_genome_known";
-     die "\n";
-}
+@orig_search_ids = find_by_blasting("$genome_path/$orig_genome/$orig_genome", $seqfile, $blast, $outfile);
+@orig_search_ids ||  die "$seqfile doesn't exist in $orig_genome";
 
 print LOG "the closest match to $seqfile in  $orig_genome is $orig_search_ids[0]\n";
 
@@ -121,8 +105,6 @@ print LOG "gene name in $orig_genome:   $orig_gene_name\n";
 $orig_seq_file = "orig_seq.fasta";
 extract_first_seq ($outfile, $orig_protein, $orig_seq_file);
 
-`rm -f tmp*`;
-
 
 ##################################################################
 #  blast the query sequence against all of the remaining genomes
@@ -131,9 +113,8 @@ extract_first_seq ($outfile, $orig_protein, $orig_seq_file);
 @not_found = ();
 
 GENOME:
-foreach $genome (@species ) {
+foreach $genome (@genomes ) {
 
-    print $genome, "\n";
 
     #       forward search
     #
@@ -141,7 +122,7 @@ foreach $genome (@species ) {
     $found = 0;
 
     $outfile    = "tmp.fasta";
-    @forward_ids = find_by_blasting($known{$genome}, $orig_seq_file, $blast, $outfile);
+    @forward_ids = find_by_blasting("$genome_path/$genome/$genome", $orig_seq_file, $blast, $outfile);
 
     if (!@forward_ids ) {
 	print LOG "$seqfile not found in $genome, \"known\" sequences\n";
@@ -157,7 +138,7 @@ foreach $genome (@species ) {
 
 	#       back search
 	#
-	@back_ids = find_by_blasting ($orig_genome_known, "$genome.fasta", $blast, $outfile); 
+	@back_ids = find_by_blasting ("$genome_path/$orig_genome/$orig_genome", "$genome.fasta", $blast, $outfile); 
 	if (!@back_ids ){
 	    print LOG "\t reciprocal search in $orig_genome using $genome as a query produced no hits (?)\n";
 	    print LOG "*****************************************\n\n";
@@ -186,14 +167,15 @@ foreach $genome (@species ) {
 	}
     }
     
- 
-    if ( !$found ){
+
+    if ( !$found && -e "$abinit_genome_path/$genome/$genome"){
 
 	# We didn't find the protein in the "known" set og genes, or it wasn the mutual best
 	# Can we find it in the abinitio annotated genome?
 	
 
-	@ab_init_forward_ids = find_by_blasting($abinit{$genome},  $orig_seq_file, $blast, $outfile);
+	@ab_init_forward_ids = find_by_blasting("$abinit_genome_path/$genome/$genome", 
+						$orig_seq_file, $blast, $outfile);
 
 	if ( !@ab_init_forward_ids){
 
@@ -208,7 +190,8 @@ foreach $genome (@species ) {
 	   
 
 	    # now back with this one
-	    @ab_init_back_ids = find_by_blasting ($orig_genome_known,  "$genome.fasta", $blast, $outfile); 
+	    @ab_init_back_ids = find_by_blasting ("$genome_path/$orig_genome/$orig_genome", 
+						     "$genome.fasta", $blast, $outfile); 
 	    
 	    ($back_protein, $back_gene_name, $back_transcript, $back_gene_location) = split " ", $ab_init_back_ids[0];
 	    if ( $back_gene_name eq  $orig_gene_name) {
@@ -266,7 +249,7 @@ foreach $genome (@species ) {
     `rm $genome.fasta`;
 }
 
-`rm tmp_blastout  tmp.fasta  tmp_ids`;
+`rm tmp_blastout  tmp.fasta  tmp_ids $orig_seq_file`;
 
 for ($descrfile, $fastafile) {
     close $fh{$_};
@@ -291,16 +274,38 @@ foreach (@not_found) {
 
 ###############################
 ###############################
-#  align
+# optional: sort and align
+$sort   =  "/home/ivanam/perlscr/fasta_manip/sort_by_taxonomy.pl";
+#$muscle =  "/homels -lrt/ivanam/downloads/muscle3.6_src/muscle";
+$mafft =  "/usr/local/bin/mafft-linsi";
 
+foreach ( $sort, $mafft) {
+    (-e $_) || die "$_ not found.\n";
+}
+
+
+$cmd = "$sort $fastafile > tmp.fasta";
+(system $cmd) && die "Error running $cmd.\n";
+`mv tmp.fasta $fastafile`;
 
 $afafile = $fastafile;
 $afafile =~  s/\.fasta/.mafft.afa/;
+#$cmd = "$muscle -stable -in $fastafile -out $afafile ";
 $cmd = "$mafft --quiet $fastafile > $afafile";
-if (system $cmd) {
-    print ERR "Error running $cmd.\n";
-    die "\n";
-}
+(system $cmd) && die "Error running $cmd.\n";
+
+############
+#$cmd = "$sort $forward_fasta > tmp.fasta";
+#(system $cmd) && die "Error running $cmd.\n";
+#`mv tmp.fasta $forward_fasta`;
+
+#$afafile = $forward_fasta;
+#$afafile =~  s/\.fasta/.mafft.afa/;
+#$cmd = "$muscle -stable -in $forward_fasta -out $afafile ";
+#$cmd = "$mafft --quiet $forward_fasta > $afafile";
+#(system $cmd) && die "Error running $cmd.\n";
+
+
 
 
 ###############################
@@ -312,10 +317,7 @@ sub find_by_blasting (@) {
     my $cmd;
 
     $cmd = "$blast -d $genome_file -i $seqfile -o tmp_blastout"; #| head -n 10 | awk \'{print \$2}\' > tmp_ids ";
-    if (system $cmd) {
-	print ERR  "Error running $cmd.\n";
-	die "\n";
-    }
+    (system $cmd) && die "Error running $cmd.\n";
 
     if ( -z "tmp_blastout" ) {
 	`rm tmp_blastout`;
@@ -324,12 +326,7 @@ sub find_by_blasting (@) {
 
     `head -n 10 tmp_blastout | awk \'{print \$2}\' > tmp_ids`;
     $cmd = "$fastacmd -d $genome_file -i tmp_ids > $temp_seq_file_name";
-    if (system $cmd) {
-	print ERR "Error running $cmd.\n";
-	die "\n";
-    }
-
-
+    (system $cmd) && die "Error running $cmd.\n";
 
     #`rm tmp_blastout  tmp_ids`;
 
@@ -369,10 +366,7 @@ sub find_by_blasting (@) {
 		last;
 	    }
 	}
-	if (! $parsed) { 
-	    print ERR "unrecognized header format:\n$hdr ";
-	    die "\n";
-	}
+	$parsed ||   die "unrecognized header format:\n$hdr ";
 
 	push @ids, "$protein $gene $transcript  $location  $novelty"; # $novelty says "novel" or "known"
 	#print "$hdr\n   $protein $gene $transcript $location $novelty\n";
@@ -415,71 +409,4 @@ sub extract_first_seq (@) {
     }
     print OF "\n";
     close OF;
-}
-
-
-sub set_mammals () {
-
-    #Primates
-    push @mammals, lc "Homo_sapiens";
-    push @mammals, lc "Pan_troglodytes";
-    push @mammals, lc "Gorilla_gorilla";
-    push @mammals, lc "Pongo_abelii";
-    push @mammals, lc "Nomascus_leucogenys";
-    push @mammals, lc "Macaca_mulatta";
-    push @mammals, lc "Otolemur_garnettii";
-    push @mammals, lc "Callithrix_jacchus";
-
-    push @mammals, lc "Microcebus_murinus";
-    push @mammals, lc "Tarsius_syrichta";
-
-    #Rodents etc.
-    push @mammals, lc "Mus_musculus";
-    push @mammals, lc "Rattus_norvegicus";
-    push @mammals, lc "Cavia_porcellus";
-    push @mammals, lc "Dipodomys_ordii";
-    push @mammals, lc "Ochotona_princeps";
-    push @mammals, lc "Oryctolagus_cuniculus";
-    push @mammals, lc "Spermophilus_tridecemlineatus";
-    push @mammals, lc "Tupaia_belangeri";
-
-    #Laurasiatheria
-    # Cetartiodactyla (whales, dolphins, hippos, ruminants, pigs, camels etc.)
-    push @mammals, lc "Bos_taurus";
-    push @mammals, lc "Sus_scrofa";
-    push @mammals, lc "Vicugna_pacos";
-    push @mammals, lc "Tursiops_truncatus";
-    # carnivores
-    push @mammals, lc "Felis_catus";
-    push @mammals, lc "Canis_familiaris";
-    push @mammals, lc "Ailuropoda_melanoleuca";
-    
-    # Insectivora (hedgehogs, shrews, moles and others)
-    push @mammals, lc "Erinaceus_europaeus";
-    push @mammals, lc "Sorex_araneus";
-    #Perissodactyla (horses, rhinos, tapirs)
-    push @mammals, lc "Equus_caballus";
-    # Chiroptera (bats)
-    push @mammals, lc "Pteropus_vampyrus";
-    push @mammals, lc "Myotis_lucifugus";
-
-    #Afrotheria
-    push @mammals, lc "Loxodonta_africana";
-    push @mammals, lc "Procavia_capensis";
-    push @mammals, lc "Echinops_telfairi";
-
-    #Xenarthra
-    push @mammals, lc "Dasypus_novemcinctus";
-    push @mammals, lc "Choloepus_hoffmanni";
-
-    #Other mammals
-    push @mammals, lc "Monodelphis_domestica";
-    push @mammals, lc "Ornithorhynchus_anatinus";
-    push @mammals, lc "Sarcophilus_harrisii";
-
-    push @mammals, lc "Macropus_eugenii";
-
-
-
-
 }
