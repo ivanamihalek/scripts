@@ -7,7 +7,7 @@ use DBI;
 
 ($dbname) = @ARGV;
 
-($dbh = DBI->connect("DBI:mysql:$dbname", "root", "")) ||
+($dbh = DBI->connect("DBI:mysql:$dbname", "marioot", "tooiram")) ||
  die "Cannot connect to $dbname.\n";
 
 #########################################################################
@@ -35,13 +35,13 @@ foreach $table (@tables) {
 
 }
 
-
-
 =pod
+
+
 #search in database
 print "##############################\n";
-$query = "SELECT sequence FROM protein ".
-    "WHERE ensembl_id='$protid'";
+$query = "SELECT  ref_protein_id FROM  gene ".
+    " WHERE species = 'Homo_sapiens'" ;
 
 print $query."\n";
 
@@ -55,6 +55,7 @@ while(@row = $sth->fetchrow_array) {
     print "\n";
 }
 $rc=$sth->finish;
+
 
 print "##############################\n";
 $query = "SELECT ensembl_id FROM exon ".
