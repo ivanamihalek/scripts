@@ -26,7 +26,7 @@ my $write_cmd_log = 1;
 my $pdb2gro;
 my $gromacs_path = "/usr/local/bin";
 my $perl_path    = "/home/ivanam/perlscr/gromacs";
-#my $perl_path    = "/Users/ivana/perlscr/gromacs";
+#my $perl_path   = "/Users/ivana/perlscr/gromacs";
 my $mpirun       = "/usr/local/bin/mpirun";
 my ($mdrun, $mdrun_mpi, $grompp);
 my $gromacs_run;
@@ -783,6 +783,8 @@ sub fix_impl_params (@){
     $params{"CD"} =  $params{"CA"}; # should united atome appear here at all ...?
     $params{"CP"} =  $params{"CA"};
     $params{"CX"} =  $params{"CT"}; # CX - tip of that funny three-membered ring
+    $params{"CE"} =  $params{"C*"};
+    $params{"CG"} =  $params{"C*"};
 
     $params{"NT"} =  $params{"N3"}; # sp3 nitrogen with 4 substituents
     $params{"NH"} =  $params{"N2"}; # sp2 nitrogen in base NH2 group or arginine NH2

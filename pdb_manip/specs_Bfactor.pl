@@ -3,7 +3,8 @@
  
 
 (defined $ARGV[2]) ||
-    die "Usage:  $0  <method [rvet|ivet|entr|pheno|det]>  <specs score file>  <pdb_file_full_path>  [<chain> and/or -r and/or -b] \n"; 
+    die "Usage:  $0  <method [rvet|ivet|entr|pheno|det]>  <specs score file>".
+    "  <pdb_file_full_path>  [<chain> and/or -r and/or -b] \n"; 
 ($method, $ranks_file, $pdb_file) = @ARGV;
 
 $chain = "";
