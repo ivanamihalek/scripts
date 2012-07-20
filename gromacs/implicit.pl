@@ -8,13 +8,13 @@ sub make_fake_top (@);
 sub fix_impl_params (@);
 
 defined $ARGV[0] ||
-    die "Usage: gromacs.pl <pdb name root>/no_protein [<list of ligand names> -remd|-min].\n";
+    die "Usage: gromacs.pl <pdb name root>/no_protein [<list of ligand names> -postp|-min].\n";
 
 $| = 1; # turn on autoflush;
 
 # remd flag must be the last, for now
-my $remd = 0;
-($ARGV[$#ARGV] eq "-remd") && ($remd = 1);
+my $postp = 0;
+($ARGV[$#ARGV] eq "-postp") && ($postp = 1);
 my $minimization = 0;
 ($ARGV[$#ARGV] eq "-min" ) && ($minimization = 1);
 
@@ -32,6 +32,8 @@ my ($mdrun, $mdrun_mpi, $grompp);
 my $gromacs_run;
 my $groc;
 my $genrestr; 
+my $trjconv;
+my $babel;
 my $grompp_root;
 my $protein = 0;
 my $home = `pwd`; chomp $home;
@@ -45,6 +47,11 @@ $grompp      = "$gromacs_path/grompp";
 $groc        = "$perl_path/gro_concat.pl";
 $pdb2gro     = "$perl_path/pdb2gro.pl";
 $genrestr    = "$gromacs_path/genrestr";
+$trjconv     = "$gromacs_path/trjconv";
+
+$babel       = "/usr/local/bin/babel";
+
+
 
 if ($hostname eq "donkey") {
 
@@ -64,6 +71,12 @@ foreach ($gromacs_path,  $perl_path, $gromacs_run, $grompp, $groc, $pdb2gro, $ge
 
 $gromacs_run .= " -nt 1";
 
+
+if ( $postp) {
+    foreach ($trjconv, $babel) {
+	( -e $_ ) || die "\n$_ not found.\n\n";
+    }
+}
 
 if ( $np && ! -e $mpirun) {
     die "\n$mpirun not found.\n\n";
@@ -92,11 +105,17 @@ if (  $forcefield  eq  "oplsaa" || $forcefield  eq "amber99sb" ) {
 
 ##############################################################################
 ##############################################################################
-my ($in_dir, $top_dir, $em1_dir, $em2_dir,  $production) = 
-    ("00_input", "01_topology", "02_em_steepest", "03_em_lbfgs", "04_production");
+my ($in_dir, $top_dir, $em1_dir, $em2_dir,  $production, $postpcss) = 
+    ("00_input", "01_topology", "02_em_steepest", "03_em_lbfgs", "04_production", "05_postpcss");
 
 foreach ( $in_dir, "$in_dir/em_steep.mdp", "$in_dir/em_lbfgs.mdp",  "$in_dir/md.mdp" ) {
     ( -e $_ ) || die "\n$_ not found.\n\n";
+}
+
+if ( $postp) {
+    foreach ("$in_dir/pr.mdp") {
+	( -e $_ ) || die "\n$_ not found.\n\n";
+    }
 }
 
 if ( $name eq "no_protein") {
@@ -587,6 +606,145 @@ if (!  -e  $file) {
     print "\t $file found\n"; 
 }
 
+############################################################################## 
+##############################################################################
+
+$postp || exit;
+
+
+###############
+# postprocessing - specific for the implicit system
+###############
+sub postprocess_ligand ();
+sub postprocess_protein ();
+sub run_pos_restr ();
+
+chdir $home;
+(-e $postpcss) || `mkdir $postpcss`;
+chdir $postpcss;
+
+#
+# make pdb file
+#
+$file = "$name.md.pdb";
+if (!  -e  $file) {
+    $program = "$trjconv";
+    $log     = "trjconv.log";
+    print "\t runnning $program\n";
+    $command = "(echo 0; echo 0) |  $program -s ../$production/$name.md.tpr ".
+	"-f ../$production/$name.md.trr -o $name.md.pdb -pbc mol -ur compact -center > $log  2>&1";
+    #
+    ( $write_cmd_log ) &&  print CMD_LOG "$command\n";
+    (system $command) 
+	&& die "Error:\n$command\n"; 
+   error_state_check ( "$log", ("maxwarn"));
+} else {
+    print "\t $file found\n"; 
+}
+
+
+#
+# process individual frames
+#
+my $protein_pdb = "";
+my $ligand_pdb  = "";
+my @LIGAND_NAMES = map { uc $_} @ligand_names;
+
+open (IF, "<$file") || 
+    die "Cno $file: $!.\n";
+
+while ( <IF> ) {
+
+    if  ($_=~/^ENDMDL/ || $_=~/^TER/)   {
+
+	$ligand_pdb  && postprocess_ligand();
+	$protein_pdb && postprocess_protein();
+	run_pos_restr ();
+
+
+	exit;
+
+	$protein_pdb = "";
+	$ligand_pdb  = "";
+	    
+    } elsif ($_=~/^ATOM/) {
+
+	my $res_name = substr $_,  17, 3; $res_name=~ s/\s//g;
+
+	if ( grep { /$res_name/} (@LIGAND_NAMES, "LIG") ) {
+	    $ligand_pdb .= $_;
+	} else {
+	    $protein_pdb .= $_;
+	}
+
+    } 
+}
+close IF;
+
+sub run_pos_restr () {
+
+
+ 
+}
+
+sub postprocess_ligand () {
+
+    my $log = "lig_postp.log";
+
+    open ( PDB, ">ligand.pdb" ) ||
+	die "Cno ligand.pdb: $!.\n";
+    print PDB $ligand_pdb;
+    close PDB;
+
+
+    # make gro file
+    $file = "ligand.gro";
+    if ( ! -e $file ) {
+	$program = $babel;
+	$command = "$program ligand.pdb $file > $log 2>&1";
+	( $write_cmd_log ) &&  print CMD_LOG "$command\n";
+	(system $command) 
+	    && die "Error:\n$command\n"; 
+    }
+   
+    # make restraint file - doesn't know about coords, so we can do it only once
+    $file = "posre_ligand.itp";
+    if ( ! -e $file ) {
+	$program = $genrestr;
+	$command = "echo 0 | $program -f ligand.gro -o $file  -fc 1000 1000 1000 > $log  2>&1";
+	($write_cmd_log ) &&  print CMD_LOG "$command\n";
+	(system $command) 
+	    && die "Error:\n$command\n"; 
+    }
+    return;
+}
+
+
+sub postprocess_protein () {
+
+    open ( PDB, ">protein.pdb" ) ||
+	die "Cno protein.pdb: $!.\n";
+    print PDB $protein_pdb;
+    close PDB;
+
+    $file = "posre.itp";
+
+    if ( ! -e $file ) {
+
+	(-e "../04_production/posre.itp") || 
+	    die "../04_production/posre.itp not found\n";
+	`ln -s ../04_production/posre.itp .`;
+
+    }
+
+    return;
+}
+
+
+############################################################################## 
+##############################################################################
+
+
 
 ###############
 #  compress the trajectory, strip hydrogens and gzip
@@ -698,6 +856,11 @@ sub make_fake_top (@){
     print FAKE "#include \"posre.itp\"\n";
     print FAKE "#endif\n";
 
+    print FAKE "; Ligand position restraints\n";
+    print FAKE "#ifdef POSRES_LIGAND\n";
+    print FAKE "#include \"posre_ligand.itp\"\n";
+    print FAKE "#endif\n";
+
     print FAKE "; Include water topology\n";
     print FAKE "#include \"$forcefield.ff/$water.itp\"\n";
 
@@ -772,7 +935,12 @@ sub fix_impl_params (@){
     $params{"O2"} = "           0.17     1      0.922    0.148     0.85 ; O";
     $params{"S"} = "            0.18     1      1.121    0.1775    0.96 ; S";
     $params{"SH"} = "           0.18     1      1.121    0.1775    0.96 ; S";
-
+    $params{"BR"}= "            0.1      1      1        0.125     0.85 ; BR";
+    $params{"F"}= "             0.1      1      1        0.156     0.85 ; F";
+    $params{"CL"}= "            0.1      1      1        0.70      0.85 ; CL";
+    $params{"I"}= "             0.1      1      1        0.206     0.85 ; I";
+    $params{"P5"}= "            0.1      1      1        0.190     0.85 ; P5";
+         
     # take as identical (Ivana);
     # these are "united" how did they end up in the same list as all-atom?
     # sp3
@@ -785,6 +953,7 @@ sub fix_impl_params (@){
     $params{"CX"} =  $params{"CT"}; # CX - tip of that funny three-membered ring
     $params{"CE"} =  $params{"C*"};
     $params{"CG"} =  $params{"C*"};
+    $params{"H2"} =  $params{"H"};
 
     $params{"NT"} =  $params{"N3"}; # sp3 nitrogen with 4 substituents
     $params{"NH"} =  $params{"N2"}; # sp2 nitrogen in base NH2 group or arginine NH2
@@ -794,8 +963,14 @@ sub fix_impl_params (@){
 
 
     $params{"OS"} =  $params{"OH"}; # sther or esther O params  replaced by alcohol
-    
-   
+    $params{"SS"} =  $params{"S"};    
+    $params{"N1"} =  $params{"N2"}; #triple bond in CN?
+    $params{"NC"} =  $params{"NB"};
+    $params{"NO"} =  $params{"NB"}; # nitrobenzyl?
+    $params{"SY"} =  $params{"S"}; #sulfur in 5 ring member
+    $params{"SS"} =  $params{"S"}; # sulfur dioxide
+    $params{"C1"} =  $params{"C"}; #sp carbon
+
     `cp $itpfile $itpfile.orig`;
     my @lines = split "\n", `cat $itpfile.orig`;
     my $new_itp = "";

@@ -19,7 +19,7 @@ while ( <RES> ) {
     @aux = split;
     $pos = $aux[0];
     $pos =~ s/\s//g;
-     $selected{$pos} = 1;
+    $selected{$pos} = 1;
 }
 
 close RES;

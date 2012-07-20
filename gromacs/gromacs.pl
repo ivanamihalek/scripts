@@ -7,7 +7,7 @@ sub  error_state_check (@ ); # defined at the bottom
 sub make_fake_top (@);
 
 defined $ARGV[0] ||
-    die "Usage: gromacs.pl <pdb name root>/no_protein [<list of ligand names> -remd|-min].\n";
+    die "Usage: gromacs.pl <pdb name root>/no_protein [<list of ligand names> -remd|-min|-posres].\n";
 
 $| = 1; # turn on autoflush;
 
@@ -16,6 +16,8 @@ my $remd = 0;
 ($ARGV[$#ARGV] eq "-remd") && ($remd = 1);
 my $minimization = 0;
 ($ARGV[$#ARGV] eq "-min" ) && ($minimization = 1);
+my $posres = 0;
+($ARGV[$#ARGV] eq "-posres" ) && ($posres = 1);
 
 ##############################################################################
 ##############################################################################
@@ -91,24 +93,34 @@ my ($in_dir, $top_dir, $em1_dir, $em2_dir, $pr1_dir, $pr2_dir, $production) =
     ("00_input", "01_topology", "02_em_steepest", "03_em_lbfgs", 
     "04_nvt_eq", "05_mpt_eq", "06_production");
 
-foreach ( $in_dir, "$in_dir/em_steep.mdp", "$in_dir/em_lbfgs.mdp", 
-    "$in_dir/pr_nvt.mdp", "$in_dir/md.mdp" ) {
+foreach ( $in_dir, "$in_dir/em_steep.mdp", "$in_dir/em_lbfgs.mdp") {
     ( -e $_ ) || die "\n$_ not found.\n\n";
 }
+
+if ( ! $minimization) {
+    (-e "$in_dir/pr_nvt.mdp") ||  die "$in_dir/pr_nvt.mdp not found.\n";
+}
+
+if ( !$minimization  && ! $posres ) {
+    foreach  ( "$in_dir/pr_npt.mdp" , "$in_dir/md.mdp" ) {
+	( -e $_ ) || die "\n$_ not found.\n\n";
+    }
+}
+
+
 
 if ( $name eq "no_protein") {
     $protein = 0;
     (  defined $ARGV[1] ) ||
 	die "No protein, no small molecule ... what are we doing here?\n";
     $box_edge    =  1.6;
+    ($posres )  &&  ($box_edge =  1.2);
 } else {
     ( -e "$in_dir/$name.pdb") || die "$in_dir/$name.pdb not found\n";
     $protein = 1;
+    ($posres )  &&  ($box_edge =  0.7);
 }
 
-foreach ( $top_dir, $em1_dir, $em2_dir, $pr1_dir, $pr2_dir, $production) {
-    (-e $_) || `mkdir $_`;
-}
 
 ##############################################################################
 ##############################################################################
@@ -253,6 +265,7 @@ my $log;
 ###############
 
 chdir $home;
+(-e $top_dir) || `mkdir $top_dir`;
 chdir $top_dir;
 
 if ( ! -e "$name.top" || ! -e "$name.gro" )  {
@@ -446,6 +459,7 @@ if (!  -e  $file) {
 # preprocessing  = making of  tpr file
 
 chdir $home;
+( -e  $em1_dir) || `mkdir $em1_dir`;
 chdir $em1_dir;
 
 $file = "$name.em_input.tpr";
@@ -641,6 +655,7 @@ if (!  -e  $file) {
 # minimization - round 2
 # will have to dom some re-grompping, though
 chdir $home;
+( -e  $em2_dir) || `mkdir $em2_dir`;
 chdir $em2_dir;
 
 $file = "$name.em_input.tpr";
@@ -696,7 +711,9 @@ $minimization && exit;
 # position-restrained md - NVT
 ###############
 chdir $home;
+( -e  $pr1_dir) || `mkdir $pr1_dir`;
 chdir $pr1_dir;
+`ln -s ../$in_dir/posre*.itp`;
 
 # preprocessing
 $file = "$name.pr.tpr";
@@ -735,11 +752,16 @@ if (!  -e  $file) {
     print "\t $file found\n"; 
 }
 
+
+$posres && exit;
+
 ###############
 # position-restrained md - NPT
 ###############
 chdir $home;
+( -e  $pr2_dir) || `mkdir $pr2_dir`;
 chdir $pr2_dir;
+`ln -s ../$in_dir/posre*.itp`;
 
 # preprocessing
 $file = "$name.pr.tpr";
@@ -786,6 +808,7 @@ if (!  -e  $file) {
 ###############
 
 chdir $home;
+( -e  $production) || `mkdir $production`;
 chdir $production;
 
 
@@ -941,6 +964,11 @@ sub make_fake_top (@){
     print FAKE "; Include Position restraint file\n";
     print FAKE "#ifdef POSRES\n";
     print FAKE "#include \"posre.itp\"\n";
+    print FAKE "#endif\n";
+
+    print FAKE "; Include Position restraint file\n";
+    print FAKE "#ifdef POSRES_LIGAND\n";
+    print FAKE "#include \"posre_ligand.itp\"\n";
     print FAKE "#endif\n";
 
     print FAKE "; Include water topology\n";
