@@ -33,7 +33,9 @@ my $gromacs_run;
 my $groc;
 my $genrestr; 
 my $trjconv;
+my $g_energy;
 my $babel;
+my $gmx_wrapper;
 my $grompp_root;
 my $protein = 0;
 my $home = `pwd`; chomp $home;
@@ -46,8 +48,10 @@ $gromacs_run = "$gromacs_path/mdrun";
 $grompp      = "$gromacs_path/grompp";
 $groc        = "$perl_path/gro_concat.pl";
 $pdb2gro     = "$perl_path/pdb2gro.pl";
+$gmx_wrapper = "$perl_path/gromacs.pl";
 $genrestr    = "$gromacs_path/genrestr";
 $trjconv     = "$gromacs_path/trjconv";
+$g_energy     = "$gromacs_path/g_energy";
 
 $babel       = "/usr/local/bin/babel";
 
@@ -615,9 +619,10 @@ $postp || exit;
 ###############
 # postprocessing - specific for the implicit system
 ###############
-sub postprocess_ligand ();
+sub postprocess_ligand (@_);
 sub postprocess_protein ();
 sub run_pos_restr ();
+sub energies_from_posrestr();
 
 chdir $home;
 (-e $postpcss) || `mkdir $postpcss`;
@@ -632,7 +637,7 @@ if (!  -e  $file) {
     $log     = "trjconv.log";
     print "\t runnning $program\n";
     $command = "(echo 0; echo 0) |  $program -s ../$production/$name.md.tpr ".
-	"-f ../$production/$name.md.trr -o $name.md.pdb -pbc mol -ur compact -center > $log  2>&1";
+	"-f ../$production/$name.md.trr -o $name.md.pdb  -fit progressive  -skip 10  > $log  2>&1";
     #
     ( $write_cmd_log ) &&  print CMD_LOG "$command\n";
     (system $command) 
@@ -649,29 +654,51 @@ if (!  -e  $file) {
 my $protein_pdb = "";
 my $ligand_pdb  = "";
 my @LIGAND_NAMES = map { uc $_} @ligand_names;
+my $posres_in_dir = "00_input";
+my $res_name;
+my $current_ligand_name = "";
+my $frame_ct = 0;
+my $begin_time = 0;
+
+(-e $posres_in_dir) && `rm -rf $posres_in_dir`;
+`mkdir $posres_in_dir`;
+`cp ../$in_dir/resolvation_input/*  $posres_in_dir`;
+
+open (CUM, ">cumulative.table") || 
+    die "Cno cumulative.table: $!.\n";
+my   $avg_coul = 0;
+my    $avg_lj  = 0;
 
 open (IF, "<$file") || 
     die "Cno $file: $!.\n";
 
 while ( <IF> ) {
-
+ 
     if  ($_=~/^ENDMDL/ || $_=~/^TER/)   {
 
-	$ligand_pdb  && postprocess_ligand();
+	$frame_ct++;
+	$begin_time = time;
+
+	`rm -rf 0[1-4]*`;
+	$ligand_pdb  && postprocess_ligand ($current_ligand_name);
 	$protein_pdb && postprocess_protein();
 	run_pos_restr ();
+	energies_from_posrestr();
+
+	printf "processed frame %d (%ds)\n", $frame_ct, time-$begin_time;
 
 
-	exit;
 
 	$protein_pdb = "";
 	$ligand_pdb  = "";
+	$current_ligand_name = "";
 	    
     } elsif ($_=~/^ATOM/) {
 
-	my $res_name = substr $_,  17, 3; $res_name=~ s/\s//g;
+	$res_name = substr $_,  17, 3; $res_name=~ s/\s//g;
 
 	if ( grep { /$res_name/} (@LIGAND_NAMES, "LIG") ) {
+	    $current_ligand_name || ($current_ligand_name = lc $res_name);
 	    $ligand_pdb .= $_;
 	} else {
 	    $protein_pdb .= $_;
@@ -680,16 +707,56 @@ while ( <IF> ) {
     } 
 }
 close IF;
+cllose CUM;
+
+
+sub energies_from_posrestr(){
+    
+    chdir "04_nvt_eq";
+
+    my $log = "energy.log";
+    my $ret;
+    my $cmd = "(echo 44; echo 45) | $g_energy -f ener.edr  | tail -n50 | tee tmp";
+    (system $cmd) && die "Error running $cmd.\n";
+
+    my ($field_name, $avg, $err, $rmsd, $drift) = ();
+    ($field_name, $avg, $err, $rmsd, $drift) = split " ", `grep \'LJ-SR\' tmp`;
+
+    my $LJ = $avg;
+
+    ($field_name, $avg, $err, $rmsd, $drift) = ();
+    ($field_name, $avg, $err, $rmsd, $drift) = split " ", `grep \'Coul-SR\' tmp`;
+
+    my $Coul = $avg;
+
+    $avg_coul += $Coul;
+    $avg_lj   += $LJ;
+
+    printf CUM " %4d   %8.3f    %8.3f      %8.3f    %8.3f  \n", 
+    $frame_ct, $LJ, $Coul,  $avg_coul/$frame_ct, $avg_lj/$frame_ct;
+    
+    chdir "..";
+
+}
+
 
 sub run_pos_restr () {
 
+    my $log = "posres.log";
 
+ 
+    $program = $gmx_wrapper;
+    $command = "$program no_protein ligands -posres > $log 2>&1";
+    ( $write_cmd_log ) &&  print CMD_LOG "$command\n";
+    (system $command) 
+	&& die "Error:\n$command\n";    
  
 }
 
-sub postprocess_ligand () {
+sub postprocess_ligand (@_ ) {
 
     my $log = "lig_postp.log";
+    my $name = $_[0];
 
     open ( PDB, ">ligand.pdb" ) ||
 	die "Cno ligand.pdb: $!.\n";
@@ -698,24 +765,26 @@ sub postprocess_ligand () {
 
 
     # make gro file
-    $file = "ligand.gro";
-    if ( ! -e $file ) {
-	$program = $babel;
-	$command = "$program ligand.pdb $file > $log 2>&1";
-	( $write_cmd_log ) &&  print CMD_LOG "$command\n";
-	(system $command) 
-	    && die "Error:\n$command\n"; 
-    }
+    $file = "$name.gro";
+    $program = $babel;
+    $command = "$program ligand.pdb $file > $log 2>&1";
+    ( $write_cmd_log ) &&  print CMD_LOG "$command\n";
+    (system $command) 
+	&& die "Error:\n$command\n"; 
    
     # make restraint file - doesn't know about coords, so we can do it only once
     $file = "posre_ligand.itp";
     if ( ! -e $file ) {
 	$program = $genrestr;
-	$command = "echo 0 | $program -f ligand.gro -o $file  -fc 1000 1000 1000 > $log  2>&1";
+	$command = "echo 0 | $program -f $name.gro -o $file  -fc 1000 1000 1000 > $log  2>&1";
 	($write_cmd_log ) &&  print CMD_LOG "$command\n";
 	(system $command) 
 	    && die "Error:\n$command\n"; 
     }
+    `cp $file $posres_in_dir`;
+
+    `mv $name.gro $posres_in_dir`;
+
     return;
 }
 
@@ -726,7 +795,9 @@ sub postprocess_protein () {
 	die "Cno protein.pdb: $!.\n";
     print PDB $protein_pdb;
     close PDB;
-
+    `mv protein.pdb  $posres_in_dir`;
+  
+   
     $file = "posre.itp";
 
     if ( ! -e $file ) {
@@ -736,6 +807,7 @@ sub postprocess_protein () {
 	`ln -s ../04_production/posre.itp .`;
 
     }
+   `cp $file $posres_in_dir`;
 
     return;
 }
