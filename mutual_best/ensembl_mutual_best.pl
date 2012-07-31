@@ -329,8 +329,6 @@ sub find_by_blasting (@) {
 	die "\n";
     }
 
-
-
     #`rm tmp_blastout  tmp_ids`;
 
     my @headers = split "\n", `grep \'>\' $temp_seq_file_name`;
