@@ -3,8 +3,10 @@
 use lib ("/usr/lib/perl5/5.8.1");
 use DBI;
 
-$database="human_genome";
-$user="";
+@ARGV || die "Usage: $! <db name>.\n";
+
+$database = $ARGV[0];
+$user    ="root";
 $password="";
 $dbh = DBI->connect("DBI:mysql:$database", $user, $password);
 

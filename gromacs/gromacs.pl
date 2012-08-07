@@ -145,6 +145,9 @@ my %opls_ion_names = ( "mg", "MG2+", "ca", "CA2+",   "li", "LI+",
 		       "cs", "Cs+",   "f", "F-",   "cl", "CL-",   
 		       "br", "BR-",   "i", "I-");
 
+
+(-e $top_dir) || `mkdir $top_dir`;
+
 if ( defined $ARGV[1] ) {
     my @aux;
     open ( LF, "<$in_dir/$ARGV[1]") ||
@@ -237,8 +240,10 @@ if ( defined $ARGV[1] ) {
 		# handle other types of ligands
 		} else {
 
-		    ( -e "$in_dir/$name_root.gro") || die "$in_dir/$name_root.gro must be prepared in advance\n";
-		    ( -e "$in_dir/$ln.itp") || die "$in_dir/$ln.itp must be prepared in advance\n";
+		    ( -e "$in_dir/$name_root.gro") || 
+			die "$in_dir/$name_root.gro must be prepared in advance\n";
+		    ( -e "$in_dir/$ln.itp") || 
+			die "$in_dir/$ln.itp must be prepared in advance\n";
 		}
 	    }
 	    if ( ! defined $ion{$ligand_name} ) { # ion "topology" is included by default

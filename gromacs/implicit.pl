@@ -53,8 +53,6 @@ $genrestr    = "$gromacs_path/genrestr";
 $trjconv     = "$gromacs_path/trjconv";
 $g_energy     = "$gromacs_path/g_energy";
 
-$babel       = "/usr/local/bin/babel";
-
 
 
 if ($hostname eq "donkey") {
@@ -64,6 +62,8 @@ if ($hostname eq "donkey") {
     $gromacs_run  = "/usr/bin/mdrun";
     $mdrun_mpi    = "/usr/bin/mdrun_mpi";
     $mpirun       = "/usr/bin/mpirun";
+    $genrestr    = "/usr/bin/genrestr";
+    $trjconv     = "/usr/bin/trjconv";
 
 } else {
     $mdrun_mpi = "";
@@ -77,7 +77,7 @@ $gromacs_run .= " -nt 1";
 
 
 if ( $postp) {
-    foreach ($trjconv, $babel) {
+    foreach ($trjconv) {
 	( -e $_ ) || die "\n$_ not found.\n\n";
     }
 }
@@ -158,6 +158,8 @@ my %opls_ion_names = ( "mg", "MG2+", "ca", "CA2+",   "li", "LI+",
 		       "na", "NA+",   "k", "K+",   "rb", "Rb+",   
 		       "cs", "Cs+",   "f", "F-",   "cl", "CL-",   
 		       "br", "BR-",   "i", "I-");
+
+(-e  $top_dir) || `mkdir $top_dir`;
 
 if ( defined $ARGV[1] ) {
     my @aux;
@@ -757,7 +759,8 @@ sub postprocess_ligand (@_ ) {
 
     my $log = "lig_postp.log";
     my $name = $_[0];
-
+    my $number_of_atoms = 0;
+    my @ret;
     open ( PDB, ">ligand.pdb" ) ||
 	die "Cno ligand.pdb: $!.\n";
     print PDB $ligand_pdb;
@@ -766,12 +769,21 @@ sub postprocess_ligand (@_ ) {
 
     # make gro file
     $file = "$name.gro";
-    $program = $babel;
-    $command = "$program ligand.pdb $file > $log 2>&1";
+    $program = $pdb2gro ;
+    $command = "$program  < ligand.pdb > tmpfile";
     ( $write_cmd_log ) &&  print CMD_LOG "$command\n";
     (system $command) 
 	&& die "Error:\n$command\n"; 
-   
+
+    `echo ligand.pdb > $file`;
+    @ret = split " ", `wc -l tmpfile`;
+    `echo $ret[0] >> $file`;
+    `cat tmpfile >> $file`;
+    `echo '  0.000   0.000   0.000 ' >> $file`;
+    `rm tmpfile`;
+
+
+
     # make restraint file - doesn't know about coords, so we can do it only once
     $file = "posre_ligand.itp";
     if ( ! -e $file ) {
