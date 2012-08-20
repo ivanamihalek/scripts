@@ -17,8 +17,8 @@ while ( <IF> ) {
     chdir $home;
     chdir $dbname;
 
-    # $cmd = "mysqladmin -u root create $dbname";
-    # (system $cmd) && die "error running $cmd\n";
+    $cmd = "mysqladmin -u root create $dbname";
+    (system $cmd) && die "error running $cmd\n";
 
     $cmd = "mysql -u root $dbname < $dbname.sql";
     (system $cmd) && die "error running $cmd\n";
