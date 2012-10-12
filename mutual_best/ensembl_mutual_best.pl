@@ -15,7 +15,7 @@ sub set_mammals ();
 ################################################
 $blast    = "/usr/bin/blastall";
 $fastacmd = "/usr/bin/fastacmd";
-$mafft    =  "/usr/local/bin/mafft";
+$mafft    = "/usr/local/bin/mafft";
 
 ################################################
 ################################################
