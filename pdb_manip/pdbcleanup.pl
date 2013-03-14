@@ -36,7 +36,7 @@ while ( <IF> ) {
     $i_code = substr $_, 27, 1;  $i_code=~ s/\s//g;
     $x = substr $_,30, 8;  $x=~ s/\s//g;
     $y = substr $_,38, 8;  $y=~ s/\s//g;
-    $z = substr $_,46, 8; $z=~ s/\s//g;
+    $z = substr $_,46, 8;  $z=~ s/\s//g;
 
     next if ( $alt_loc =~ "B" );
     next if ( $alt_loc =~ "C" );

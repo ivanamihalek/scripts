@@ -39,7 +39,7 @@ while ( <IF> ) {
 	$name = $1;
 	if ( ! defined $tax_order{ substr $name, 0, 7} ) {
 	    die "Tax_order for $name not found in $taxonomy_file.\n".
-		"(The assumed name form is SPC_SPC_GENENAME.)\n";
+		"(The assumed name form i s SPC_SPC_GENENAME.)\n";
 	}
 	push @names,$name;
 	$sequence{$name} = "";
