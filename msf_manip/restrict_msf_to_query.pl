@@ -61,7 +61,6 @@ foreach $pos ( 0 .. $max_pos ) {
     $delete[$pos] = 1;
     for $query_seq (@protected_names) {
 	if (! defined $array{$query_seq} ) {
-	    print $query_seq, "\n";
 	    next;
 	}
 	if ( $array{$query_seq}[$pos] !~ /[\-\.]/) { #|| is added by zong hong since some seq has \. as gaps
