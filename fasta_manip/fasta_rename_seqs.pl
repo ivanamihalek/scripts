@@ -75,7 +75,7 @@ sub makename {
 
     } elsif ( /^>\w+\|\w+[\|\s]\((\w+)\)[\|\s]/ ) {
 	$name=$1;
-    } elsif ( /^>(\S+)/ ) { # generic
+    } elsif ( /^>\s*(\S+)/ ) { # generic
 	$name=$1;
     }
 }
