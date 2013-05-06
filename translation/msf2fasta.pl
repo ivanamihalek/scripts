@@ -38,7 +38,7 @@ close MSF;
 foreach $seq_name ( keys %seqs ) {
     $seqs{$seq_name} =~ s/\-/./g;
     @seq = split ('', $seqs{$seq_name});
-    print  "> $seq_name \n";
+    print  ">$seq_name \n";
     $ctr = 0;
     for $i ( 0 .. $#seq ) {
 	if ( $seq[$i] !~ '\.' ) {

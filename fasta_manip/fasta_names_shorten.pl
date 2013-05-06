@@ -18,7 +18,9 @@ while (<STDIN>) {
     } elsif ( />\s*gi\|(\d+)\|/ ) { # for gi names
 	$name = $1;
 	if ( /\[(.+)\]/) {
-	    @aux = split " ", $1;
+	    $sci_name = $1;
+	    $sci_name =~ s/\(.*\)//g;
+	    @aux = split " ", $sci_name;
 	    @short = map {substr $_, 0, 3}  @aux;
 	    $spec = uc join "_",  @short[0..1];
 	    $name = $spec."_".$name;
