@@ -100,7 +100,10 @@ close IF;
 #######################################################
 
 
-$sequence  ||  die "$query_chain_name not found in $pdb_file or $pdb_file empty\n";
+if (! $sequence ) {
+    print "chain $query_chain_name not found in $pdb_file or $pdb_file empty\n";
+    exit(1);
+}
 
 #######################################################
 # we won't go out of here without having a chain name
