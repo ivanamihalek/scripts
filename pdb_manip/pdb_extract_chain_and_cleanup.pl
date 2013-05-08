@@ -77,6 +77,8 @@ while ( <IF> ) {
     # consumption of various conservation and similar programs
     # that do not care about post-translational modifications
     
+    substr ($new_line,  0, 6)  =  "ATOM  ";
+    
     substr ($new_line,  17, 3) = $one2three{$three2one{$res_name}};
     # collect  coords
     $coordinates .= $new_line;
