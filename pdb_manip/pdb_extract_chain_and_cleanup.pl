@@ -40,14 +40,14 @@ $sequence     = "";
 $coordinates  = "";
 while ( <IF> ) {
 
+
     last if ( /^ENDMDL/);
     last if ( /^TER/);
     next if ( ! /^ATOM/ && ! /^HETATM/ );
 
-
     # chain: if given, must be present
     $chain_name = substr ( $_,  21, 1) ;
-    next if ( $query_chain_name &&   ($chain_name ne $query_chain_name) );
+    next if ( $chain_name =~ /\S/ && $query_chain_name &&   ($chain_name ne $query_chain_name) );
 
     # we don't care about alternativei locations in this story
     $alt_loc = substr $_,16, 1 ;  $alt_loc =~ s/\s//g;
