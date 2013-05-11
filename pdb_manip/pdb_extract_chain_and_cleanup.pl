@@ -42,14 +42,14 @@ while ( <IF> ) {
 
 
     last if ( /^ENDMDL/);
-    last if ( /^TER/);
+    #last if ( /^TER/);
     next if ( ! /^ATOM/ && ! /^HETATM/ );
 
     # chain: if given, must be present
     $chain_name = substr ( $_,  21, 1) ;
     next if ( $chain_name =~ /\S/ && $query_chain_name &&   ($chain_name ne $query_chain_name) );
 
-    # we don't care about alternativei locations in this story
+    # we don't care about alternative locations in this story
     $alt_loc = substr $_,16, 1 ;  $alt_loc =~ s/\s//g;
     next if ( $alt_loc =~ /[BC]/ );
 
@@ -69,8 +69,11 @@ while ( <IF> ) {
     # if the chain field is empty, fill as $query_chain_name or  "A"
     $new_line = $_;
     if ($chain_name eq " ") {
-	$chain_name =  $query_chain_name  || "A";
-	substr ($new_line,  21, 1) =  $chain_name;
+	$query_chain_name || ($query_chain_name =  "A");
+	substr ($new_line,  21, 1) =  $query_chain_name;
+
+    } else {
+	$query_chain_name = $chain_name;
     }
 
     #make sure we use the standard names - this is exclusively for the
@@ -111,8 +114,8 @@ if (! $sequence ) {
 # we won't go out of here without having a chain name
 $root_name  = $pdb_file;
 $root_name  =~ s/\.pdb$//g;
-$new_pdb    = $root_name.$chain_name.".pdb";
-$seq_file   = $root_name.$chain_name.".seq";
+$new_pdb    = $root_name.$query_chain_name.".pdb";
+$seq_file   = $root_name.$query_chain_name.".seq";
 
 
 open (PDB, ">$new_pdb") || die "Cno $new_pdb: $!.\n";
