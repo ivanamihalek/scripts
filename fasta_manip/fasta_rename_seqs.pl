@@ -4,7 +4,7 @@ use File::Basename;
 sub makename;
 
 (@ARGV > 1) || 
-    die ("Usage: fasta_rename <input.afa>  <index file (output)>  [suffix]"); 
+    die "Usage: fasta_rename <input.afa>  <index file (output)>  [suffix] \n"; 
 
 open (my $input, "<", $ARGV[0]);
 open (my $index, ">>", $ARGV[1]);
