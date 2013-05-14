@@ -3,7 +3,8 @@ use strict;
 use File::Basename;
 sub makename;
 
-die ("Usage: fasta_rename <input.afa> <index.afa>  [suffix]") if (@ARGV<2);
+(@ARGV > 1) || 
+    die ("Usage: fasta_rename <input.afa>  <index file (output)>  [suffix]"); 
 
 open (my $input, "<", $ARGV[0]);
 open (my $index, ">>", $ARGV[1]);
