@@ -11,17 +11,18 @@ open (IF, "<$filename" )
 
 $home = `pwd`; chomp $home;
 while ( <IF> ) {
+    next if ( !/\s/);
     chomp;
     ($dbname) = split;
     print "$dbname\n";
     chdir $home;
     chdir $dbname;
 
-    # $cmd = "mysqladmin -u root create $dbname";
-    # (system $cmd) && die "error running $cmd\n";
+    $cmd = "mysqladmin -u root create $dbname";
+    (system $cmd) && warn "error running $cmd\n";
 
     $cmd = "mysql -u root $dbname < $dbname.sql";
-    (system $cmd) && die "error running $cmd\n";
+    (system $cmd) && warn "error running $cmd\n";
 
     $cmd = "mysqlimport -u root --fields_escaped_by=\\\\ $dbname -L *.txt";
     (system $cmd) && die "error running $cmd\n";

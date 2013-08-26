@@ -4,7 +4,7 @@
     die "Usage:  $0  <file name> \n";
 
 
-$taxonomy_file = "/home/ivanam/databases/tax_attempt";
+$taxonomy_file = "/home/ivanam/perlscr/tax_attempt";
 $filename = $taxonomy_file;
 
 open (IF, "<$filename" ) 

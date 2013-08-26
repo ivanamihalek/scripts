@@ -60,7 +60,7 @@ foreach ($gromacs_path,  $perl_path, $gromacs_run, $grompp, $groc, $pdb2gro) {
     ( -e $_ ) || die "\n$_ not found.\n\n";
 }
 
-$gromacs_run .= " -nt 1";
+$gromacs_run .= " -nt 6";
 
 
 if ( $np && ! -e $mpirun) {

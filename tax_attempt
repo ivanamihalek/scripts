@@ -1,0 +1,151 @@
+HOM_SAP  1
+
+# primates
+GOR_GOR  2
+PAN_TRO  2
+PAN_PAN  2 Pan paniscus (bonobo)
+PON_PYG  2
+PON_ABE  2 Pongo abelii (orangutan)
+MAC_MUL  2 Macaca mulatta
+MAC_FAS  2 Macaca fascicularis
+NOM_LEU  2  Nomascus leucogenys  (Gibbon)
+HYL_LAR  2  Hylobates lar (Common gibbon)
+PAP_CYN  2 Papio cynocephalus (Yellow baboon)
+CER_AET  2  Cercopithecus aethiops (African green monkey)
+CAL_JAC  2
+TAR_SYR  2
+OTO_GAR  2
+MIC_MUR  2  Microcebus_murinus	Mouse lemur
+
+
+# rodents & rabbits
+MUS_MUS  3
+RAT_NOR  3
+CAV_POR  3
+DIP_ORD  3  Dipodomys_ordii  Kangaroo_rat
+OCH_PRI  3  Ochotona_princeps	Pika (rabbit)
+ORY_CUN  3
+SPE_TRI  3 Spermophilus_tridecemlineatus	Squirrel
+
+
+
+# Insectivora (hedgehogs, shrews, moles and others)
+SOR_ARA  4  Sorex_araneus	Eurasian shrew
+ERI_EUR  4 Erinaceus_europaeus	Hedgehog
+
+# carnivores
+CAN_FAM  5
+FEL_CAT  5
+AIL_MEL  5  Ailuropoda melanoleuca  panda
+MUS_PUT  5 Mustela putorius furo ferret
+
+# Chiroptera (bats)
+MYO_LUC  6  Myotis lucifugus 	Microbat
+PTE_VAM  6  Pteropus vampyrus   Megabat
+
+# tree shrews 
+TUP_BEL  7
+
+
+# Cetartiodactyla (whales, dolphins, hippos, ruminants, pigs, camels etc.)
+BOS_TAU  8
+BUB_BUB  8 Bubalus bubalis (water buffalo)
+BOS_IND  8 Bos indicus (zebu cattle)
+BOS_MUT  8 Bos mutus grunniens (Wild yak)
+VIC_PAC  8 Vicugna pacos  Alpaca
+SUS_SCR  8
+TUR_TRU  8 Tursiops truncatus Dolphin
+CAP_HIR  8 Capra hircus (Goat)
+OVI_ARI  8 Ovis aries
+CAM_DRO  8 Camelus dromedarius (Arabian camel)
+
+
+#Perissodactyla (horses, rhinos, tapirs)
+EQU_CAB  9
+EQU_ASI  9  Equus asinus (Donkey)
+
+
+# afrotheria (elephants, seacows, manatees, hyraxes)
+LOX_AFR  10
+PRO_CAP  10  Procavia capensis	Hyrax
+ECH_TEL  10  Echinops_telfairi	Lesser_hedgehog (echinops)
+
+# Xenarthra (sloths, armadillos, anteaters)
+CHO_HOF  11
+DAS_NOV  11
+
+
+# metatheria (marsupials)
+MON_DOM  12  opossum
+MAC_EUG  12  wallaby
+MAC_RUF  12 Macropus rufogriseus (red-necked wallaby)
+TRI_VUL  12 Trichosurus vulpecula (Brush-tailed possum)
+SAR_HAR  12 Sarcophilus harrissii (Tasmanian devil)
+
+# monotremes 
+ORN_ANA  13 platypus
+TAC_ACU  13 Tachyglossus aculeatus aculeatus (Australian echidna)
+
+# birds
+ANA_PLA  14 Anas platyrhynchos  duck
+GAL_GAL  14
+MEL_GAL  14
+MEL_UND   14  Melopsittacus undulatus Budgerigar
+TAE_GUT  14
+
+# amphibians and reptiles
+CHR_PIC  15 Chrysemys picta bellii Painted Turtle
+XEN_TRO  15
+XEN_LAE  15
+ANO_CAR  15  Anolis carolinensis  (Anole lizard)
+PEL_SIN  15 Pelodiscus sinensis (Chinese soft-shelled turtle)
+
+# fish
+DAN_RER  16
+GAD_MOR  16  Gadus morhua (Atlantic cod)
+GAS_ACU  16
+LEP_OCU  16  Lepisosteus oculatus  Spotted Gar
+TAK_RUB  16
+TET_NIG  16
+ORY_LAT  16
+ORE_NIL  16  Oreochromis niloticus   Nile tilapia
+
+
+# insects
+ACY_PIS  17
+AED_AEG  17
+CUL_QUI  17
+ANO_GAM  17
+API_MEL  17
+DRO_ANA  17
+DRO_ERE  17
+DRO_GRI  17
+DRO_MEL  17
+DRO_MOJ  17
+DRO_PER  17
+DRO_PSE  17
+DRO_SEC  17
+DRO_SIM  17
+DRO_VIR  17
+DRO_WIL  17
+DRO_YAK  17
+IXO_SCA  17 
+PED_HUM  17
+NAS_VIT  17
+TRI_CAS  17
+
+# other metazoa
+BRA_FLO  18
+BRU_MAL  18
+CAE_ELE  18
+CIO_INT  18
+CIO_INT  18
+CIO_SAV  18
+NEM_VEC  18
+OIK_DIO  18
+PET_MAR  18  Petromyzon_marinus lamprey
+TRI_ADH  18
+
+
+# yeast
+SAC_CER 20
