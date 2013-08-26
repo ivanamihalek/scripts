@@ -15,7 +15,7 @@ $chain = "";
 (defined $ARGV[1] ) && ($chain = $ARGV[1]);
 # check that the lengths of the two match
 %letter_code = ( 'GLY', 'G', 'ALA', 'A',  'VAL', 'V', 'LEU','L', 'ILE','I',
-                 'MET', 'M', 'PRO', 'P',  'TRP', 'W', 'PHE','F', 'SER','S',
+                 'MET', 'M', 'PRO', 'P',  'TRP', 'W', 'PHE','F', 'SER','S', 'SCY', 'C',
                  'CYS', 'C', 'THR', 'T',  'ASN', 'N', 'GLN','Q', 'TYR','Y',
                  'LYS', 'K', 'ARG', 'R',  'HIS', 'H', 'ASP','D', 'GLU','E', 'PTR', 'Y',
                  'MSE', 'M' ); 
@@ -36,7 +36,7 @@ open ( IF, "<$filename" ) || die "Cno $filename: $!.\n";
 while ( <IF> ) {
 
     last if (  /^ENDMDL/  );
-    if ( ! /^ATOM/  ) {
+    if ( ! /^ATOM/ && ! /^HETATM/  ) {
 	next;
     }
 
@@ -47,9 +47,10 @@ while ( <IF> ) {
 
     $name = substr $_,  12, 4 ;  $name =~ s/\s//g; 
     $name =~ s/\*//g; 
-    $alt_loc = substr $_,16, 1 ;  $alt_loc =~ s/\s//g;
-    $res_seq  = substr $_, 22, 5;  $res_seq=~ s/\s//g;
-    $res_name = substr $_,  17, 4; $res_name=~ s/\s//g;
+    $alt_loc  = substr $_, 16, 1;  $alt_loc =~ s/\s//g;
+    $res_seq  = substr $_, 22, 5;  $res_seq =~ s/\s//g;
+    $res_name = substr $_, 17, 4; $res_name =~ s/\s//g;
+    defined $letter_code{$res_name} || next;
     grep ( /$res_name/, @modifications) && next;
     next if ( $alt_loc =~ "B" );
     $newline = $_;

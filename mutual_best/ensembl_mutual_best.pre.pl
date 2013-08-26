@@ -12,57 +12,40 @@ $blast    = "/usr/bin/blastall";
 $fastacmd = "/usr/bin/fastacmd";
 $mafft    = "/usr/local/bin/mafft";
 
-$ensembl_path = "/mnt/ensembl/release-67/fasta";
+$db_path = "/home/ivanam/databases/ensembl_pre";
+$home = `pwd`;
+chomp $home;
 
 ################################################
 #  input negotiation
 #
-(@ARGV > 3) || 
-    die "Usage: $0 <input seq file> <orig_genome>  ".
+(@ARGV >= 3) || 
+    die "Usage: $0 <input seq file>  ".
     "<descr file (output)> <fasta file (output)> [<name tag>] \n";
 
-($seqfile, $orig_genome, $descrfile, $fastafile)  =  @ARGV;
+($seqfile,  $descrfile, $fastafile)  =  @ARGV;
 $name_tag = "";
-(@ARGV > 4) && ($name_tag = $ARGV[4]);
+(@ARGV > 3) && ($name_tag = $ARGV[3]);
 
-$orig_genome_known  = <$ensembl_path/$orig_genome/pep/*.all.fa>;
-$orig_genome_known  || die "known genome not found for $orig_genome\n";
-$orig_genome_abinit = <$ensembl_path/$orig_genome/pep/*.abinitio.fa>;
-$orig_genome_abinit || die "abinit genome not found for $orig_genome\n";
+$orig_genome  = "/mnt/ensembl/release-67/fasta/homo_sapiens/pep/Homo_sapiens.GRCh37.67.pep.all.fa" ;
+(-e $orig_genome)  || die " $orig_genome not found\n";
+
 
 ################################################
 #  check if we have everything that we need
 #
-foreach ($seqfile, $ensembl_path, $blast, $fastacmd, $mafft) {
+foreach ($seqfile, $blast, $fastacmd, $mafft, $db_path) {
     (-e $_) || die "$_ not found.\n";
 }
 
 $blast .= " -p blastp -e 1.e-2 -m 8 -a 4"; # m 8 = output in a tabular format; a 4 = 4 cpus
 
-@mammals = ();
-set_mammals();
-@vertebrates = ();
-set_vertebrates();
-
-# Mammals or vertebrates?
-#@species = @mammals;
-@species = @vertebrates;
-#@species = (@mammals, @vertebrates);
-
-
-foreach $species (@species) {
-    @tmp = <$ensembl_path/$species/pep/*.all.fa>;
-    $known{$species}  = $tmp[0];
-    $known{$species}  || die "known genome not found for $species in ($known{$species}) n";
-    @tmp = <$ensembl_path/$species/pep/*.abinitio.fa>;
-    $abinit{$species} = $tmp[0];
-    $abinit{$species} || die "abinit genome not found for $species\n";
-}
 
 ################################################
 #  output files
 #
 for ($descrfile, $fastafile) {
+    print $_, "\n";
     open ($fh{$_}, ">$_") ||
 	die "Cno $_: $!.\n";
 }
@@ -79,29 +62,16 @@ open (ERR, ">errlog")   || die "Cno errlog: $!.\n";
 #  find the  query sequence in the "original" genome (together
 #  with the  gene/protein/trnascript entry it belongs to)
 #
-
 $outfile    = "tmp.fasta";
 @orig_search_ids = ();
-@orig_search_ids = find_by_blasting($orig_genome_known, $seqfile, $blast, $outfile);
-if  ( @orig_search_ids) {
-    print LOG "the closest match to $seqfile in  $orig_genome is $orig_search_ids[0]\n";
-
-
-} else {
+@orig_search_ids = find_by_blasting($orig_genome, $seqfile, $blast, $outfile);
+if  (! @orig_search_ids) {
     `rm -f tmp*`;
-    print LOG "$seqfile does not exist in $orig_genome_known";
-    
-    @orig_search_ids = find_by_blasting($orig_genome_abinit, $seqfile, $blast, $outfile);
-
-    if  ( !@orig_search_ids) {
-	
-	print ERR " $seqfile not found in  neither $orig_genome_known  nor $orig_genome_abinit\n";
-	die "\n";
-    }
-
-    
+     print ERR "$seqfile does not exist in $orig_genome_known";
+     die "\n";
 }
 
+print LOG "the closest match to $seqfile in  $orig_genome is $orig_search_ids[0]\n";
 
 ($orig_protein, $orig_gene_name, $orig_transcript, $orig_gene_location) = split " ", $orig_search_ids[0];
 
@@ -113,15 +83,15 @@ extract_first_seq ($outfile, $orig_protein, $orig_seq_file);
 
 `rm -f tmp*`;
 
-
 ##################################################################
 #  blast the query sequence against all of the remaining genomes
 #
-
-@not_found = ();
+chdir $db_path;
+@genomes = split "\n", `ls `;
+chdir $home;
 
 GENOME:
-foreach $genome (@species ) {
+foreach $genome (@genomes ) {
 
     print $genome, "\n";
 
@@ -131,14 +101,24 @@ foreach $genome (@species ) {
     $found = 0;
 
     $outfile    = "tmp.fasta";
-    @forward_ids = find_by_blasting($known{$genome}, $orig_seq_file, $blast, $outfile);
+
+    chdir $db_path;
+    chdir $genome;
+    $genome_fa   =  `ls *.fa`; chomp $genome_fa;
+    $genome_file = "$db_path/$genome/$genome_fa";
+
+    chdir $home;
+    (-e $genome_file) || die "$genome_file not found\n";
+
+    @forward_ids = find_by_blasting($genome_file, $orig_seq_file, $blast, $outfile);
+
 
     if (!@forward_ids ) {
 	print LOG "$seqfile not found in $genome, \"known\" sequences\n";
 
     } else {
 
-	# if we found something, we still need to check if it is mutual best
+	# lif we found something, we still need to check if it is mutual best
 	print LOG "best forward hit:  $forward_ids[0]  \n";
 
 	($protein, $gene_name, $transcript, $gene_location) = split " ", $forward_ids[0];
@@ -147,7 +127,7 @@ foreach $genome (@species ) {
 
 	#       back search
 	#
-	@back_ids = find_by_blasting ($orig_genome_known, "$genome.fasta", $blast, $outfile); 
+	@back_ids = find_by_blasting ($orig_genome, "$genome.fasta", $blast, $outfile); 
 	if (!@back_ids ){
 	    print LOG "\t reciprocal search in $orig_genome using $genome as a query produced no hits (?)\n";
 	    print LOG "*****************************************\n\n";
@@ -177,48 +157,6 @@ foreach $genome (@species ) {
     }
     
  
-    if ( !$found ){
-
-	# We didn't find the protein in the "known" set og genes, or it wasn the mutual best
-	# Can we find it in the abinitio annotated genome?
-	
-
-	@ab_init_forward_ids = find_by_blasting($abinit{$genome},  $orig_seq_file, $blast, $outfile);
-
-	if ( !@ab_init_forward_ids){
-
-	    $found = 0;
-	    push @not_found, $genome;
-	    print LOG "\t\t$seqfile not found in $genome, \"ab initio\" sequences\n";
-
-	} else {
-
-	    ($protein, $gene_name, $transcript, $gene_location) = split " ", $ab_init_forward_ids[0];
-	    extract_first_seq ($outfile, $protein, "$genome.fasta");
-	   
-
-	    # now back with this one
-	    @ab_init_back_ids = find_by_blasting ($orig_genome_known,  "$genome.fasta", $blast, $outfile); 
-	    
-	    ($back_protein, $back_gene_name, $back_transcript, $back_gene_location) = split " ", $ab_init_back_ids[0];
-	    if ( $back_gene_name eq  $orig_gene_name) {
-	
-		$found = 1;
-		print LOG "\t\t best mutual hit:  $gene_name  $protein\n";
-
-	    } else {
-		
-		$found = 0;
-		push @not_found, $genome;
-		@{$forward_ids{$genome}} = @forward_ids;
-		@{$ab_init_forward_ids{$genome}} = @ab_init_forward_ids;
-
-		print LOG "\t\t no mutual best found in ab initio either\n";
-	    }
-	}
-    }
-    
-
 
     print LOG "*****************************************\n\n";
 
@@ -252,9 +190,12 @@ foreach $genome (@species ) {
     print {$fh{$fastafile}} join "\n", @lines;
     print {$fh{$fastafile}} "\n";
 
+    print  "$fastafile: >$spec_name\n";
+
 
     `rm $genome.fasta`;
 }
+
 
 `rm tmp_blastout  tmp.fasta  tmp_ids`;
 
@@ -360,8 +301,17 @@ sub find_by_blasting (@) {
 	    }
 	}
 	if (! $parsed) { 
-	    print ERR "unrecognized header format:\n$hdr ";
-	    die "\n";
+
+	    if ($hdr =~ /(ENS\w\w\wP0\w+)/) {
+		$protein =  $1;
+	    } elsif ($hdr =~ /(ENSP\w+)/) {
+		$protein =  $1;
+	    } elsif ($hdr =~ /lcl\:(\S+)/) {
+		$protein =  $1;
+	    } else {
+		print ERR "unrecognized header format:\n$hdr ";
+		die "\n";
+	    }
 	}
 
 	push @ids, "$protein $gene $transcript  $location  $novelty"; # $novelty says "novel" or "known"
@@ -473,27 +423,27 @@ sub set_mammals () {
 
 }
 
-sub set_vertebrates () {
+sub set_vertibrates () {
 
     #Birds
-    push @vertebrates, lc "Taeniopygia_guttata";
-    push @vertebrates, lc "Gallus_gallus";
-    push @vertebrates, lc "Meleagris_gallopavo";
+    push @vertibrates, lc "Taeniopygia_guttata";
+    push @vertibrates, lc "Gallus_gallus";
+    push @vertibrates, lc "Meleagris_gallopavo";
 
     #Reptiles
-    push @vertebrates, lc "Anolis_carolinensis";
+    push @vertibrates, lc "Anolis_carolinensis";
 
     #Amphibians
-    push @vertebrates, lc "Xenopus_tropicalis";
+    push @vertibrates, lc "Xenopus_tropicalis";
 
     #Fish
-    push @vertebrates, lc "Tetraodon_nigroviridis";
-    push @vertebrates, lc "Takifugu_rubripes";
-    push @vertebrates, lc "Gasterosteus_aculeatus";
-    push @vertebrates, lc "Oryzias_latipes";
-#    push @vertebrates, lc "Danio_rerio"; # Zebrafish doesn't work!
+    push @vertibrates, lc "Tetraodon_nigroviridis";
+    push @vertibrates, lc "Takifugu_rubripes";
+    push @vertibrates, lc "Gasterosteus_aculeatus";
+    push @vertibrates, lc "Oryzias_latipes";
+#    push @vertibrates, lc "Danio_rerio"; # Zebrafish doesn't work!
 
     #Lampreys
-    push @vertebrates, lc "Petromyzon_Marinus";
+    push @vertibrates, lc "Petromyzon_Marinus";
 
 }

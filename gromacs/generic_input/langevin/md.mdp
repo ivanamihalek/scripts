@@ -57,7 +57,7 @@ compressibility          = 4.5e-05
 ref_p                    = 1.0 
 
 ; energy groups for postprocessing
-energygrps               = vhd  SOL
+;energygrps               = vhd  SOL
 
 
 ; Do not generate velocities
