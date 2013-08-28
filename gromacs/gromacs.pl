@@ -140,7 +140,7 @@ my %ion = ( "K", 1, "Na",  1, "Ca", 2,  "Mg", 2, "Cl", -1, "Zn", 2,
 	    "NA",  1, "CA", 2,  "MG", 2, "CL", -1, "ZN", 2, 
 	    "na",  1, "ca", 2,  "mg", 2, "cl", -1, "zn", 2 );
 # is this correct?
-my %opls_ion_names = ( "mg", "MG2+", "ca", "CA2+",   "li", "LI+",   
+my %opls_ion_names = ( "mg", "MG", "ca", "CA2+",   "li", "LI+",   
 		       "na", "NA+",   "k", "K+",   "rb", "Rb+",   
 		       "cs", "Cs+",   "f", "F-",   "cl", "CL-",   
 		       "br", "BR-",   "i", "I-");
@@ -211,6 +211,8 @@ if ( defined $ARGV[1] ) {
 			open (ION_IF, "<$in_dir/$name_root.pdb");
 			open (ION_OF, ">$top_dir/$name_root.gro");
 			while ( <ION_IF> ) {
+
+			    /^HETATM/  || /^ATOM/ || next;
 
 			    $ion_type = substr $_, 12, 4;  $ion_type =~ s/\s//g;
 			    $serial   = substr $_,  6, 5;  $serial =~ s/\s//g;
