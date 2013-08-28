@@ -60,7 +60,7 @@ foreach ($gromacs_path,  $perl_path, $gromacs_run, $grompp, $groc, $pdb2gro) {
     ( -e $_ ) || die "\n$_ not found.\n\n";
 }
 
-$gromacs_run .= " -nt 6";
+$gromacs_run .= " -nt 1";
 
 
 if ( $np && ! -e $mpirun) {
@@ -71,9 +71,9 @@ if ( $np && ! -e $mpirun) {
 ##############################################################################
 
 my $name        = $ARGV[0]; # expect ok pdb file called $name.pdb present
-my $forcefield  = "amber99sb";
+#my $forcefield  = "amber99sb";
 my $water = "tip3p";
-#my $forcefield = "oplsaa";
+my $forcefield = "oplsaa";
 #my $forcefield = "gmx";
 #my $box_type   = "cubic";
 my $box_type    = "triclinic";
