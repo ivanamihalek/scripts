@@ -2,96 +2,97 @@
 use IO::Handle;         #autoflush
 # FH -> autoflush(1);
 
-( @ARGV >= 3  ) ||
-    die "Usage: $0   <pdb_file> <from> <to> [<chain>].\n";
+##########################################################
+# check the input arguments
+( @ARGV >= 2  ) ||
+    die "Usage: $0   <pdb_file>  <residue_list_file>.\n";
 
-($pdbfile, $from, $to)  = @ARGV;	
+($pdbfile, $reslist_fnm)  = @ARGV;	
 
-$chain = "";
-if ( @ARGV == 4 ) {
-    $chain = pop @ARGV;
-} 
+foreach ($pdbfile, $reslist_fnm) {
+    -e $_ || die "$_ not found.\n";
+}
 
-$cedir  = "/home/ivanam/downloads/ce_distr";
-$extr   = "/home/ivanam/perlscr/extractions/matrix_from_ce.pl";
-$rotate = "/home/ivanam/perlscr/pdb_manip/pdb_affine_tfm.pl";
 
-open ( IF, "<$pdbfile") ||
-    die "Cno $pdbfile: $!.\n";
+##########################################################
+# check the dependencies
+$user_home = "/home/ivanam/";
+(-e  $user_home)  || ($user_home = "/Users/ivana/");
+(-e  $user_home)  || die "User home directory not found.\n";
+
+$fitter = "$user_home/c-utils/fitter/fitter";
+
+foreach ($user_home, $fitter) {
+    -e $_ || die "$_ not found.\n";
+}
+
+
+##########################################################
+# new name for the output file
+$out_fnm = $pdbfile;
+$out_fnm =~ s/.pdb$//;
+$out_fnm .= ".fitted.pdb";
+
+##########################################################
+# loop over models is the pdb file
+open ( IF, "<$pdbfile") ||  die "Cno $pdbfile: $!.\n";
 
 $reading = 0;
 $outstr = "";
-$substr = "";
+$first_model = 1;
 
 while ( <IF> ) {
+    
+    ####
+    # start of a new model
     if ( /^MODEL\s+(\d+)/ ) {
        $model_no = $1;
        $reading  =  1;
        $outstr   = $_;
+   
+    ####
+    # reading ...
+    } elsif (  $reading  && (/^ATOM/ || /^HETATM/) ) {
 
+       $outstr .= $_;
+
+    ####
+    # end of a model: process
     } elsif ( $reading  &&  (/^ENDMDL/ || /^TER/)  ) {
 
 	$outstr .= "ENDMDL\n";
-	if (! $model_no ) {
+
+	# special treatment for the first model/frame: just output
+	if ($first_model) {
+	    
+	    $first_model = 0;
 
 	    $file = "frame0.pdb";
-	    open ( OF, ">$file") ||
-		die "Cno $file: $!.\n";
+	    open ( OF, ">$file") || die "Cno $file: $!.\n";
 	    print OF $outstr;
 	    close OF;
-	    `cp frame0.pdb all_frames.pdb`;
+	    
+	    `cp frame0.pdb $out_fnm`;
 
-	    $file = "substr0.pdb";
-	    open ( OF, ">$file") ||
-		die "Cno $file: $!.\n";
-	    print OF $outstr;
-
+	# for all other models/frames
 	} else {
 
 	    $file = "current_frame.pdb";
-	    open ( OF, ">$file") ||
-		die "Cno $file: $!.\n";
+	    open ( OF, ">$file") || die "Cno $file: $!.\n";
 	    print OF $outstr;
 	    close OF;
 
-	    $file = "current_substr.pdb";
-	    open ( OF, ">$file") ||
-		die "Cno $file: $!.\n";
-	    print OF $substr;
-	    close OF;
-
-	    ( -e "pom" ) || `ln -s $cedir/pom .`;
-
-	    $cmd = "$cedir/CE - substr0.pdb - current_substr.pdb - /tmp > current.ce";
+	    $cmd = "$fitter current_frame.pdb frame0.pdb $reslist_fnm current";
 	    system ($cmd ) && die "Error running $cmd\n";
-
-	    $cmd = "$extr current.ce > current.aff";
-	    system ($cmd ) && die "Error running $cmd\n";
-
-	    $cmd = "$rotate current_frame.pdb current.aff > curr_rot.pdb";
-	    system ($cmd ) && die "Error running $cmd\n";
-
-	    `cat  curr_rot.pdb >> all_frames.pdb`;
+	    `echo MODEL $model_no >> $out_fnm`;
+	    `grep -v REMARK current.rot.pdb >> $out_fnm`;
+	    `echo ENDMDL >> $out_fnm`;
 	    
 	}
 	$outstr  = "";
-	$substr  = "";
- 	$reading = 0;
+	$reading = 0;
 
-   } elsif (  $reading  && (/^ATOM/ || /^HETATM/) ) {
-       # save the whole struct
-       $outstr .= $_;
-
-       # separately save the substruct we will be fitting to
-       $res_seq   = substr $_, 22, 4;  $res_seq=~ s/\s//g;
-       $chainname = substr $_, 21, 1; 
-       next if ( $chain  &&  ($chain ne $chainname));
-       if ( $res_seq >= $from &&  $res_seq <= $to) {
-	   $substr .= $_;
-       }
     }
 }
 
-`rm current_substr.pdb current_frame.pdb curr_rot.pdb`;
-`rm frame0.pdb substr0.pdb`;
-`rm current.ce current.aff`;
+`rm frame0.pdb current_frame.pdb current.rot.pdb`;

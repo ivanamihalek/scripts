@@ -27,6 +27,9 @@ my $cmd_log = 1;
 my $pdb2gro;
 my $gromacs_path = "/usr/local/bin";
 my $perl_path    = "/home/ivanam/perlscr/gromacs";
+if ( `hostname` =~ /Mac/ ) { 
+    $perl_path    = "/Users/ivana/perlscr/gromacs";
+}
 my $mpirun = "/usr/local/bin/mpirun";
 my ($mdrun, $mdrun_mpi, $grompp);
 my $gromacs_run;
@@ -71,9 +74,9 @@ if ( $np && ! -e $mpirun) {
 ##############################################################################
 
 my $name        = $ARGV[0]; # expect ok pdb file called $name.pdb present
-#my $forcefield  = "amber99sb";
+my $forcefield  = "amber99sb";
 my $water = "tip3p";
-my $forcefield = "oplsaa";
+#my $forcefield = "oplsaa";
 #my $forcefield = "gmx";
 #my $box_type   = "cubic";
 my $box_type    = "triclinic";
@@ -618,7 +621,6 @@ if (!  -e  $file) {
 	    $ion_request =  " -pname $ion_name -np $charge ";
 	}
 
-
     } else {
 	$input_system_for_md = "$name.water.gro";
     }
@@ -673,7 +675,7 @@ if (! -e  $file) {
     $program = "$grompp";
     print "\t runnning $program \n";
     $command = "$program -f ../$in_dir/em_lbfgs.mdp  -c ../$em1_dir/$name.em_out.gro  ".
-	"  -p ../$top_dir/$name.top -o $name.em_input.tpr ";
+	"  -p ../$top_dir/$name.top -o $name.em_input.tpr   ";
     ( -e "../$in_dir/groups.ndx" ) && ($command .=  " -n ../$in_dir/groups.ndx ");
     $command 	.= "> $log  2>&1";
    ( $cmd_log ) &&  print CMD_LOG "$command\n";
@@ -777,7 +779,7 @@ if (!  -e  $file) {
     $log  = "grompp_before_pos_restr_md.log";
     print "\t runnning $program  \n";
     $command = "$program -f ../00_input/pr_npt.mdp -c ../$pr1_dir/$name.pr.gro ".
-	"   -p ../$top_dir/$name.top -o $file ";
+	"   -p ../$top_dir/$name.top -o $file";
     ( -e "../$in_dir/groups.ndx" ) && ($command .=  " -n ../$in_dir/groups.ndx ");
     $command 	.= "> $log  2>&1";
     ( $cmd_log ) &&  print CMD_LOG "$command\n";
