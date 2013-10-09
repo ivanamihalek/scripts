@@ -73,8 +73,6 @@ while ( <IF> ) {
 
 	$cmd = "$fitter current_frame.pdb $external_pdb $reslist_fnm current";
 	system ($cmd ) && die "Error running $cmd\n";
-	print $cmd, "\n";
-	exit(1);
 	`echo MODEL $model_no >> $out_fnm`;
 	`grep -v REMARK current.rot.pdb >> $out_fnm`;
 	`echo ENDMDL >> $out_fnm`;
