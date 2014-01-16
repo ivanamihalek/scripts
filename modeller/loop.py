@@ -3,26 +3,43 @@
 from modeller import *
 from modeller.automodel import *
 
-log.verbose()
-env = environ()
+import sys
 
-# directories for input atom files
-env.io.atom_files_directory = ['.', '.']
 
-# Create a new class based on 'loopmodel' so that we can redefine
-# select_loop_atoms (necessary)
-class MyLoop(loopmodel):
-    # This routine picks the residues to be refined by loop modeling
-    def select_loop_atoms(self):
-        # One loop from residue 19 to 28 inclusive
-        return selection(self.residue_range('394:A', '403:A'))
+#########################################
+def main():
+    
+    if len(sys.argv)<6:
+        print "usage: %s <pdb>> <sequence file>  <chain> <from> <to>" % sys.argv[0]
+        print "\t pdb should contain a single chainf, with a gap from-to residues"
+        print "\t the missing seqeunce should be in the plain text file ('sequence file')"
+        exit(1)
 
-m = MyLoop(env,
-           inimodel='test_dummy.pdb', # initial model of the target
-           sequence='test_dummy')               # code of the target
+    [pdbfile, seqfile, chain, chain_from, chain_to] = sys.argv[1:6]
+    # directories for input atom files
+    env = environ()
+    env.io.atom_files_directory = ['.', '.']
 
-m.loop.starting_model= 1           # index of the first loop model
-m.loop.ending_model  = 3           # index of the last loop model
-m.loop.md_level = refine.very_fast  # loop refinement method
+    from_label = "{0}:{1}".format (chain_from, chain)
+    to_label   = "{0}:{1}".format (chain_to, chain)
+    ########################################
+    # Create a new class based on 'loopmodel' so that we can redefine
+    # select_loop_atoms (necessary)
+    class MyLoop(loopmodel):
+        # This routine picks the residues to be refined by loop modeling
+        def select_loop_atoms(self):
+            # One loop from residue 19 to 28 inclusive
+            return selection(self.residue_range(from_label, to_label))
 
-m.make()
+    m = MyLoop (env, inimodel=pdbfile, sequence=seqfile )
+
+    m.loop.starting_model= 1           # index of the first loop model
+    m.loop.ending_model  = 3           # index of the last loop model
+    m.loop.md_level = refine.very_fast  # loop refinement method
+
+    m.make()
+
+
+#########################################
+if __name__ == '__main__':
+    main()

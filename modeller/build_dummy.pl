@@ -3,7 +3,8 @@
 sub setup_dummy_coords ();
 
 (@ARGV >= 4) ||
-    die "Usage:  $0  <complex.pdb>  <chain 1>  <chain2> <linker sequence> [# extra res on each side]\n";
+    die "Usage:  $0  <complex.pdb>  <chain 1>  <chain2> <sequence (not file, sequence)> ".
+    "[# extra res on each side]\n";
 
 $extra_res = 3;
 if (@ARGV == 5 ) {
@@ -154,6 +155,7 @@ $loop_start = $res_ctr + 1 - $extra_res;
 setup_dummy_coords();
 
 @aas = split "", $sequence;
+
 foreach $aa (@aas) {
     $res_ctr ++;
     @lines = split "\n", $dummy_coords{$aa};
