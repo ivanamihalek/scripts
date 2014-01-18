@@ -84,6 +84,14 @@ if ( $chain2 ne "-" ) {
 	die "chain $chain2 not found in $complex\n";
 }
 
+##########
+# what are we going to call the new chain
+
+if ($chain1 ne '-')  {
+    $new_chain_name = $chain1;
+} else {
+    $new_chain_name = $chain2;
+}
 
 ######################################################
 ######################################################
@@ -131,7 +139,7 @@ if ( $chain1 eq "-" ) { # we are prepending a loop
 	    }
 
 	    $atom_ctr++;
-	    (substr $line, 21, 1)  = "A";
+	    (substr $line, 21, 1)  = $new_chain_name;
 	    (substr $line, 22, 4)  = sprintf "%4d", $res_ctr;
 	    (substr $line,  6, 5)  = sprintf "%5d", $atom_ctr;
 	    (substr $line, 53, 7)  = sprintf "%7.2f", 1.0;
@@ -161,7 +169,7 @@ foreach $aa (@aas) {
     @lines = split "\n", $dummy_coords{$aa};
     foreach $line (@lines) {
 	$atom_ctr++;
-	(substr $line, 21, 1) = "A";
+	(substr $line, 21, 1) = $new_chain_name;
 	(substr $line, 22, 4) = sprintf "%4d", $res_ctr;
 	(substr $line, 6, 5)  = sprintf "%5d", $atom_ctr;
 	(substr $line,30, 8) =  sprintf "%8.3f", 0.0;
@@ -208,7 +216,7 @@ if ( $chain2 ne "-" ) { # otherwise we are appending a loop
 	    }
 
 	    $atom_ctr++;
-	    (substr $line, 21, 1) = "A";
+	    (substr $line, 21, 1) = $new_chain_name;
 	    (substr $line, 22, 4) = sprintf "%4d", $res_ctr;
 	    (substr $line, 6,  5) = sprintf "%5d", $atom_ctr;
 	    (substr $line, 53, 7) = sprintf "%7.2f", 1.0;
@@ -228,7 +236,7 @@ $new_chain_ctr = 1;
 for $chain_ctr (0 .. $#chain_name) {
     next if ($chain_name[$chain_ctr] eq $chain1);
     next if ($chain_name[$chain_ctr] eq $chain2);
-    $new_chain_id = chr (ord("A") + $new_chain_ctr);
+    #$new_chain_id = chr (ord("A") + $new_chain_ctr);
 
     @lines = split "\n", $chain[$chain_ctr];
 
@@ -243,7 +251,7 @@ for $chain_ctr (0 .. $#chain_name) {
 	}
 
 	$atom_ctr++;
-	(substr $line, 21, 1) = $new_chain_id;
+	#(substr $line, 21, 1) = $new_chain_id;
 	(substr $line, 22, 4) = sprintf "%4d", $res_ctr;
 	(substr $line,  6, 5)  = sprintf "%5d", $atom_ctr;
 	$out_str .= $line."\n";

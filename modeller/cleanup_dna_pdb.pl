@@ -29,11 +29,15 @@ while ( <IF> ) {
 	next;
 
     } elsif ( length $res_name == 2){
-	die "Do not know  how to handle res name $res_name.\n";
+	(substr $newline, 17, 3) = "$res_name ";
 
+    } elsif ( length $res_name == 1){
+	(substr $newline, 17, 3) = "$res_name  ";
+
+    } else {
+	die "No res name (?)\n".$_;
     }
    
-    (substr $newline, 17, 3) = "$res_name  ";
     
     print  $newline;
 }
