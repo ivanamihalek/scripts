@@ -31,7 +31,7 @@ TOP: while ( <FASTA> ) {
 close FASTA;
 
 
-print "var data = [ \n";
+print "var alignment = [ \n";
 $first = 1;
 foreach $name (@names) {
     if ($first) {
