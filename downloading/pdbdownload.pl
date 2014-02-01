@@ -19,6 +19,10 @@ use Net::FTP;
 
 $PDB_REPOSITORY = "/home/ivanam/databases/pdbfiles";
 
+(-e $PDB_REPOSITORY) || ($PDB_REPOSITORY = "/Users/ivana/databases/pdbfiles");
+(-e $PDB_REPOSITORY) || die "pdb repository not found.\n";
+
+
 foreach $pdbname (@pdbnames) {
 
     $pdbname =~ s/\s//g;

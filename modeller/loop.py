@@ -10,13 +10,11 @@ import sys
 def main():
     
     if len(sys.argv)<6:
-        print "usage: %s <pdb>> <loopfile>  <chain> <from> <to>" % sys.argv[0]
+        print "usage: %s <pdb> <loopfile>  <chain> <from> <to>" % sys.argv[0]
         print "\t pdb and loopfile sould be the output of build_dummy.pl"
         print "\t from and to should be the first two numbers in loopfile,"
         print "\t unless we are prepending/appending a sequence"
         print "\t in which case the numbers should be correcte for 3 res on the nonexiting side"
-        print "\t Whe prepending/appending the corresponding chain"
-        print "\t should be indicated by '-' on the command line"
         exit(1)
 
     [pdbfile, seqfile, chain, chain_from, chain_to] = sys.argv[1:6]
