@@ -13,6 +13,7 @@ $fasta =  $ARGV[0];
 open ( FASTA, "<$fasta") ||
     die "Cno $fasta: $!\n";
 
+open (OF, ">duplicates")  or die "error opening duplicates file\n";
 
 $reading = 0;
 while ( <FASTA> ) {
@@ -20,7 +21,9 @@ while ( <FASTA> ) {
     if (/^>/ ) {
 	chomp;
 	$name = $_;
+	
 	if ( defined $sequence{$name} ) {
+	    print OF "duplicate name $name\n";
 	    $reading = 0;
 	} else {
 	    $reading = 1;
@@ -34,6 +37,7 @@ while ( <FASTA> ) {
 }
 close FASTA;
 
+
 @printed = ();
 foreach $name (@names) {
     $printed = 0;
@@ -46,5 +50,12 @@ foreach $name (@names) {
     if ( ! $printed) {
 	print "$name\n";
 	print $sequence{$name};
+	push @printed, $sequence{$name};
+    } else {
+	#print OF $name, "\n";
+	print  OF " duplicate sequence: $name} \n";
     }
+
 }
+
+close OF;
