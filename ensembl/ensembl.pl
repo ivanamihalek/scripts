@@ -1,7 +1,11 @@
 #!/usr/bin/perl
+# built on ensembl API, needs bioperl
+# http://uswest.ensembl.org/info/docs/api/api_installation.html
+# see also
+### http://uswest.ensembl.org/info/docs/api/core/core_tutorial.html
 
 use Bio::EnsEMBL::Registry;
-use Data::Dumper;
+#use Data::Dumper;
 
 my $registry = 'Bio::EnsEMBL::Registry';
 
