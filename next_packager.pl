@@ -51,13 +51,13 @@ if (! -e $md5file ||  -z $md5file) {
 $checksum =  `cut -d ' ' -f 1   $md5file`;
 chomp $checksum;
 
-open ( OF, ">$boid.meta") || die "Error opening $boid.meta: $!\n";
+open ( OF, ">$boid.meta.csv") || die "Error opening $boid.meta.csv: $!\n";
 
 print OF  "investigator_name,sample_name,subject_name,gender,affected,bam_path,bam_checksum\n";
 print OF join (",", ("Bodamer", $boid, $boid, lc $gender eq "female" ? "F":"M")) , ",";
 print OF  join (",",  (lc $affected eq "affected" ? "Y":"N", "s3://bch-nextcode/ivana-bodamer/$full_path/$bamfile", $checksum) ) , "\n";
 close OF;
 
-print "meta file foor $boid can be found in $full_path/$boid.meta\n";
+print "meta file foor $boid can be found in $full_path/$boid.meta.csv\n";
 
 
