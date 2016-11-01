@@ -26,7 +26,7 @@ while (<STDIN>) {
 	    $name = $spec."_".$name;
 	}
 	print ">$name\n";
-    } elsif ( />(XP_\d+)/ ) { # forrefseq
+    } elsif ( />([XN]P_\d+)/ ) { # forrefseq
 	$name = $1;
 	if ( /\[(.+?)\]/) {
 	    $sci_name = $1;
