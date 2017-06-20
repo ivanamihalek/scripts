@@ -17,7 +17,7 @@ if ( -e $ARGV[0]  ) {
 
 use Net::FTP;
 
-$PDB_REPOSITORY = "/mnt/databases/pdb";
+$PDB_REPOSITORY = "/////////databases/pdb";
 
 (-e $PDB_REPOSITORY) || ($PDB_REPOSITORY = "/Users/ivana/databases/pdbfiles");
 (-e $PDB_REPOSITORY) || die "pdb repository not found.\n";
