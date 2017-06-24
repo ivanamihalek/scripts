@@ -12,7 +12,7 @@ my $pdbfile = $ARGV[0];
 my $old_name = defined $ARGV[1]? $ARGV[1]:"";
 my $new_name = defined $ARGV[2]? $ARGV[2]:"A";
 my $from     = defined $ARGV[3]? $ARGV[3]:-100;
-my $to       = defined $ARGV[4]? $ARGV[4]:-100000;
+my $to       = defined $ARGV[4]? $ARGV[4]:100000;
 
 open ( IF, "<$pdbfile") ||
     die "Cno $pdbfile: $!.\n";
