@@ -26,6 +26,17 @@ while (<STDIN>) {
 	    $name = $spec."_".$name;
 	}
 	print ">$name\n";
+    } elsif ( />([XN]P_\d+)/ ) { # forrefseq
+	$name = $1;
+	if ( /\[(.+?)\]/) {
+	    $sci_name = $1;
+	    $sci_name =~ s/\(.*\)//g;
+	    @aux = split " ", $sci_name;
+	    @short = map {substr $_, 0, 3}  @aux;
+	    $spec = uc join "_",  @short[0..1];
+	    $name = $spec."_".$name;
+	}
+	print ">$name\n";
     } elsif ( />.*\|(\w+?)\s/ ) { # for uniprot names
 	print "> $1\n";
     } elsif ( /([\w\d]+?)\// ) { # for Sebastian

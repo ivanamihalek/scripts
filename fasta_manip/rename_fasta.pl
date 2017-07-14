@@ -41,7 +41,7 @@ open ( FASTA, ">$fasta" ) ||
     foreach $seq_name ( @names ) {
 	
 	@seq = split ('', $sequence{$seq_name});
-	print FASTA "> $seq_name \n";
+	print FASTA ">$seq_name \n";
 	$ctr = 0;
 	for $i ( 0 .. $#seq ) {
 	    print FASTA  $seq[$i];

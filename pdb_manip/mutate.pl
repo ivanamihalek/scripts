@@ -8,7 +8,7 @@ use IO::Handle;         #autoflush
 # FH -> autoflush(1);
 
 (defined $ARGV[1] ) ||
-    die "Usage: mutate.pl  <pdbfile> <mutation list>.\n\tmutation list:  pdbid  new_aa_type\n";
+    die "Usage: mutate.pl  <pdbfile> <mutation list>.\n\tmutation list:  pdbid  new_aa_type\n(aa_type given as single letter)";
 # mutation list:  pdbid  new_aa_type
 
 $pdbfile =  $ARGV[0];
@@ -75,7 +75,7 @@ while ( <IF> ) {
 	last if ( $newtype eq "G" &&  $bb_atom eq "CB");
 	if ( $name eq  $bb_atom  ) {
 	    if ( ! defined $letter2three{$newtype} ) {
-		print " *  $res_seq   $newtype * \n";
+		print " *  $res_seq   $newtype  -- aa type not recognized (single letter code expected)* \n";
 		exit;
 	    }
 	    substr( $newline,  17, 3) = $letter2three{$newtype};
