@@ -20,10 +20,12 @@ while ( <IF> ) {
 	$filename = $name.".".$aux[1].".pdb";
 	open (FH, ">$filename") || 
 	    die "Cno $filename: $!\n";
-
+	print FH "$_\n";
     } elsif (/^ATOM/ || /^HETATM/ ) {
 	next if ( ! $reading );
 	@aux = split ('', $_);;
+	print FH "$_\n";
+    }  elsif (/^END/ ) {
 	print FH "$_\n";
     }
 

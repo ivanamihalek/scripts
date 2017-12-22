@@ -27,7 +27,9 @@ $old_res_name = "";
 $old_chain_id = "blah";
 while ( <IF> ) {
 
+    
     if ( ! /^ATOM/ && ! /^HETATM/ ) {
+        /^ENDMDL/ && ($resctr  = $starting_number -1);
 	print;
 	next;
     }

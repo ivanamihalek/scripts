@@ -1,5 +1,7 @@
-#! /usr/bin/python
+#!/usr/bin/env python
+# env gives me minionda python, modeller installed there - otherwise make your own solution
 # Loop refinement of an existing model
+
 from modeller import *
 from modeller.automodel import *
 

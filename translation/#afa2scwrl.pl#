@@ -29,6 +29,7 @@ close FASTA;
 ( @names == 2 ) || die "2 seqs expected in $fasta.\n";
 
 
+
 $template = $seq{$names[0]};
 $replacement = $seq{$names[1]};
 
