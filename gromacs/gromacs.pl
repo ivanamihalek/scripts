@@ -27,7 +27,7 @@ my $cmd_log = 1;
 my $pdb2gro;
 my $gromacs_path = "/usr/local/bin";
 my $perl_path    = "/home/ivanam/perlscr/gromacs";
-if ( `hostname` =~ /Mac/ ) { 
+if ( `hostname` =~ /Mac/ ) {
     $perl_path    = "/Users/ivana/perlscr/gromacs";
 }
 my $mpirun = "/usr/local/bin/mpirun";
@@ -41,7 +41,7 @@ my $home = `pwd`; chomp $home;
 my $hostname = `hostname`;
 chomp $hostname;
 
-  
+
 $gromacs_run = "$gromacs_path/mdrun";
 $grompp      = "$gromacs_path/grompp";
 $groc        = "$perl_path/gro_concat.pl";
@@ -80,7 +80,7 @@ my $water = "tip3p";
 #my $forcefield = "gmx";
 #my $box_type   = "cubic";
 my $box_type    = "triclinic";
-my $box_edge    =  1.2; # distance of the box edge from the molecule in nm 
+my $box_edge    =  1.2; # distance of the box edge from the molecule in nm
 my $neg_ion     = "Cl"; # theses names depend on the choice of the forcefield (check "ions.itp")
 my $pos_ion     = "Na";
 my $genion_solvent_code = 12;
@@ -92,8 +92,8 @@ if (  $forcefield  eq  "oplsaa" || $forcefield  eq "amber99sb" ) {
 
 ##############################################################################
 ##############################################################################
-my ($in_dir, $top_dir, $em1_dir, $em2_dir, $pr1_dir, $pr2_dir, $production) = 
-    ("00_input", "01_topology", "02_em_steepest", "03_em_lbfgs", 
+my ($in_dir, $top_dir, $em1_dir, $em2_dir, $pr1_dir, $pr2_dir, $production) =
+    ("00_input", "01_topology", "02_em_steepest", "03_em_lbfgs",
     "04_nvt_eq", "05_mpt_eq", "06_production");
 
 foreach ( $in_dir, "$in_dir/em_steep.mdp", "$in_dir/em_lbfgs.mdp") {
@@ -140,12 +140,12 @@ my $ligand_name;
 my $file;
 # this nomenclature corresponds to Gromacs forcefield
 my %ion = ( "K", 1, "Na",  1, "Ca", 2,  "Mg", 2, "Cl", -1, "Zn", 2,
-	    "NA",  1, "CA", 2,  "MG", 2, "CL", -1, "ZN", 2, 
+	    "NA",  1, "CA", 2,  "MG", 2, "CL", -1, "ZN", 2,
 	    "na",  1, "ca", 2,  "mg", 2, "cl", -1, "zn", 2 );
 # is this correct?
-my %opls_ion_names = ( "mg", "MG", "ca", "CA2+",   "li", "LI+",   
-		       "na", "NA+",   "k", "K+",   "rb", "Rb+",   
-		       "cs", "Cs+",   "f", "F-",   "cl", "CL-",   
+my %opls_ion_names = ( "mg", "MG", "ca", "CA2+",   "li", "LI+",
+		       "na", "NA+",   "k", "K+",   "rb", "Rb+",
+		       "cs", "Cs+",   "f", "F-",   "cl", "CL-",
 		       "br", "BR-",   "i", "I-");
 
 
@@ -153,34 +153,33 @@ my %opls_ion_names = ( "mg", "MG", "ca", "CA2+",   "li", "LI+",
 
 if ( defined $ARGV[1] ) {
     my @aux;
-    open ( LF, "<$in_dir/$ARGV[1]") ||
-	die "Cno $in_dir/$ARGV[1]: $!.\n";
+    open ( LF, "<$in_dir/$ARGV[1]") || die "Cno $in_dir/$ARGV[1]: $!.\n";
     while ( <LF> ) {
-	next if (! /\S/);
-	chomp;
-	@aux = split;
-	push @ligand_names, $aux[0];
+        next if (! /\S/);
+        chomp;
+	      @aux = split;
+	      push @ligand_names, $aux[0];
 
-	if ( $aux[0] ne "water" ) {
-	    if ( defined  $aux[1] ) {
-		$multiplicity{$aux[0]} = $aux[1];
-	    } else {
-		die "Number of instances of molecule $aux[0] not defined in $ARGV[1].\n";
-	    }
-	}
-       
+	      if ( $aux[0] ne "water" ) {
+	         if ( defined  $aux[1] ) {
+		            $multiplicity{$aux[0]} = $aux[1];
+	         } else {
+		           die "Number of instances of molecule $aux[0] not defined in $ARGV[1].\n";
+	         }
+         }
+
     }
     $protein || ($name = join "_", @ligand_names);
 
     close LF;
     foreach $ligand_name ( @ligand_names ) {
-	
+
 	if ( $ligand_name  eq "water" ) {
 	    my $cmd;
 	    my ($no_atoms, $echoname);
-            #all waters are understood to be in the same file; 
+            #all waters are understood to be in the same file;
             #itp is standard for water
-	    $file = "$in_dir/water.pdb"; 
+	    $file = "$in_dir/water.pdb";
 	    ( -e $file) || die "$file not found in ".`pwd`;
 	    $cmd = "$pdb2gro <  $in_dir/water.pdb >  $top_dir/water.gro ";
 	    (system $cmd) && die "Error running $cmd\n";
@@ -188,14 +187,14 @@ if ( defined $ARGV[1] ) {
 
 	    ($no_atoms%3) && die "number of water atoms not div by 3 (?).\n";
 	    $multiplicity{"water"} = $no_atoms/3;
-	    
+
 
 	} else {
 	    for ($mult=1; $mult <= $multiplicity{$ligand_name}; $mult ++ ) {
 		my $ln = (lc $ligand_name);
 		my $name_root = $ln;
 		my $cmd;
-		
+
 
 		if ( $multiplicity{$ligand_name} > 1 ) {
 		    $name_root = $ln.$mult;
@@ -223,13 +222,13 @@ if ( defined $ARGV[1] ) {
 			    $x = substr $_, 30, 8; $x =~ s/\s//g;
 			    $y = substr $_, 38, 8; $y =~ s/\s//g;
 			    $z = substr $_, 46, 8; $z =~ s/\s//g;
- 
-			    (defined $opls_ion_names{lc $ion_type}) || 
+
+			    (defined $opls_ion_names{lc $ion_type}) ||
 				die "opls name for  $ion_type not defined.".
 				"\n(at least not in $0).\n";
-			   
+
 			    $new_ion_type = sprintf "%-5s",  $opls_ion_names{lc $ion_type};
-			   
+
 			    printf ION_OF  "%5d%5s%5s%5d%8.3f%8.3f%8.3f\n",
 			    $res_seq, $new_ion_type,  $ion_type, $serial, $x/10, $y/10, $z/10;
 			}
@@ -245,22 +244,22 @@ if ( defined $ARGV[1] ) {
 		# handle other types of ligands
 		} else {
 
-		    ( -e "$in_dir/$name_root.gro") || 
+		    ( -e "$in_dir/$name_root.gro") ||
 			die "$in_dir/$name_root.gro must be prepared in advance\n";
-		    ( -e "$in_dir/$ln.itp") || 
+		    ( -e "$in_dir/$ln.itp") ||
 			die "$in_dir/$ln.itp must be prepared in advance\n";
 		}
 	    }
 	    if ( ! defined $ion{$ligand_name} ) { # ion "topology" is included by default
 		# all other molecules have their own gro and itp files
-		$file = lc $ligand_name.".itp"; 
+		$file = lc $ligand_name.".itp";
 		( -e "$in_dir/$file") || die "$in_dir/$file not found in ".`pwd`;
 	    }
 	}
-    } 
-} 
+    }
+}
 
-############################################################################## 
+##############################################################################
 ##############################################################################
 my $command;
 my $ret;
@@ -286,22 +285,22 @@ if ( ! -e "$name.top" || ! -e "$name.gro" )  {
 	print "\t runnning $program \n";
 	# -ignh instructs pdb2gmx to ingore H and place its own
 	$command  = "$program  -ignh -ff $forcefield -water $water -f ../$in_dir/$name.pdb -o $name.gro -p $name.top ";
-	( -e "pdb2gmx_in") && ( `rm pdb2gmx_in`); 
+	( -e "pdb2gmx_in") && ( `rm pdb2gmx_in`);
 	if ( -e "ssbridges" ) {
 	    # ssbridges has one "y\n" for each ssbridge (sequentailly
 	    # by the first cysteine) that we want to maintain
 	    # I guess "n\n" for the ones we do not want too
 	    `cat ssbridges > pdb2gmx_in`;
 	    $command  .= " -ss";
-	} 
+	}
 
 	if ( -e "termini" ) {
-	    # termini has the following format: "2\n2\n" for each chain 
-	    # (4 x 2 for two chains and so on) 
+	    # termini has the following format: "2\n2\n" for each chain
+	    # (4 x 2 for two chains and so on)
 	    `cat termini >> pdb2gmx_in`;
 	    $command  .= " -ter";
 	}
-	
+
 	( -e "pdb2gmx_in") && ($command  .= " < pdb2gmx_in");
 	$command  .= " > $log 2>&1";
 	($cmd_log)  &&  print CMD_LOG "$command\n";
@@ -344,7 +343,7 @@ if ( ! -e "$name.top" || ! -e "$name.gro" )  {
 	    $command .= " > tmp";
 	    my $ret;
 	    $ret = system $command ;
-	    $ret	&& die "Error:\n$command\n$ret"; 
+	    $ret	&& die "Error:\n$command\n$ret";
 	    ( $cmd_log ) &&  print CMD_LOG "$command\n";
 	    `mv tmp $name.gro`;
 	}
@@ -375,10 +374,10 @@ if ( ! -e "$name.top" || ! -e "$name.gro" )  {
 			print OF;
 		    }
 		}
-		foreach $ligand_name ( @ligand_names ) { 
+		foreach $ligand_name ( @ligand_names ) {
 		    if  ($ligand_name eq "water"){
 			print OF "SOL     $multiplicity{$ligand_name}\n";
-		    } else { 
+		    } else {
 			if ( $forcefield eq "oplsaa" && defined $opls_ion_names{lc $ligand_name} ) {
 			    print OF  $opls_ion_names{lc $ligand_name}. "  $multiplicity{$ligand_name}\n";
 			} else {
@@ -393,7 +392,7 @@ if ( ! -e "$name.top" || ! -e "$name.gro" )  {
 	close TOP;
 	`mv tmp $name.top`;
 
-	
+
     }
 
 } else {
@@ -412,15 +411,15 @@ if (!  -e  $file) {
     $command = "$program -f $name.gro -o $file  -bt $box_type -d $box_edge -c > $log  2>&1";
     # -c is the centering command
     (system $command)
-	&& die "Error running\n$command\n"; 
+	&& die "Error running\n$command\n";
     ( $cmd_log ) &&  print CMD_LOG "$command\n";
     # some bug in editconf: if the box triclinic it reports "no boxtype spcified,
-    # but constructs something which has all three unit cell vectors perpendicular 
+    # but constructs something which has all three unit cell vectors perpendicular
     # and of different lengths
     error_state_check ( $log, ("masses will be determined based on residue and atom names",
 				    "No boxtype specified"));
 } else {
-    print "\t $file found\n"; 
+    print "\t $file found\n";
 }
 
 
@@ -434,8 +433,8 @@ if (!  -e  $file) {
     print "\t runnning $program \n";
     $command = "$program -cp $name.box.gro -o $file  -cs spc216.gro -p $name.top > $log  2>&1";
     # -c is the centering command
-   ( system $command) 
-	&& die "Error:\n$command\nerror"; 
+   ( system $command)
+	&& die "Error:\n$command\nerror";
     ( $cmd_log ) &&  print CMD_LOG "$command\n";
     error_state_check ( $log, ("masses will be determined based on residue and atom names",
 			"radii will be determined"));
@@ -449,17 +448,17 @@ if (!  -e  $file) {
 	foreach $line ( @aux ) {
 	    @aux2 = split " ", $line;
 	    $totsol += $aux2[1];
-	} 
+	}
 	`grep -v SOL  $name.top > tmp`;
-	`mv tmp $name.top`; 
+	`mv tmp $name.top`;
 	`echo \"SOL    $totsol\" >> $name.top`
     }
     `rm  \\#* *box.gro`;
-  
-} else { 
-    print "\t $file found\n";  
+
+} else {
+    print "\t $file found\n";
 }
-############################################################################## 
+##############################################################################
 ##############################################################################
 
 
@@ -486,7 +485,7 @@ if (!  -e  $file) {
     ( -e "../$in_dir/groups.ndx" ) && ($command .=  " -n ../$in_dir/groups.ndx ");
     $command 	.= "> $log  2>&1";
     ($cmd_log ) &&  print CMD_LOG "$command\n";
-    system $command 
+    system $command
 	|| die "Error:\n$command\nerror";  # if no charge, we are done
 
 
@@ -495,12 +494,12 @@ if (!  -e  $file) {
     if ( $ret ) {
 	@aux = split " ", $ret;
 	$charge = int ( sprintf "%5.0f", pop @aux ) ;
-	print "\t charge $charge\n"; 
+	print "\t charge $charge\n";
        ( $charge ) && print "\t system has nonzero charge -  adding counterions\n";
-    }    
+    }
     if ( $charge ) {
-	error_state_check ( "$log", ("maxwarn", "WARNING 1", 
-				    "There was 1 warning", 
+	error_state_check ( "$log", ("maxwarn", "WARNING 1",
+				    "There was 1 warning",
 				    "defaults to zero instead of generating an error"));
     } else {
 	error_state_check ( "$log", ("maxwarn","defaults to zero instead of generating an error"));
@@ -522,7 +521,7 @@ if (!  -e  $file) {
 	    # grompping
 	    ( $cmd_log ) &&  print CMD_LOG "$command\n";
 	    (system $command)
-		&& die "Error:\n$command\nerror"; 
+		&& die "Error:\n$command\nerror";
 	}
 
 	#genion
@@ -549,19 +548,19 @@ if (!  -e  $file) {
 	$command = "echo $water_group_number | $program -s $file ".
 	    " -o  ../$top_dir/$name.ion.gro $ion_request> $log  2>&1";
 	( $cmd_log ) &&  print CMD_LOG "$command\n";
-	(system $command)  
-	    && die "Error:\n$command\nerror";  
+	(system $command)
+	    && die "Error:\n$command\nerror";
 
-	@aux = split " ", `grep Group $log | grep SOL`; 
+	@aux = split " ", `grep Group $log | grep SOL`;
 	if ( $aux[1] != $genion_solvent_code ) {
 	    $genion_solvent_code = $aux[1];
 	    $command = "echo $genion_solvent_code | $program -s $file ".
 		" -o  ../$top_dir/$name.ion.gro $ion_request> $log  2>&1";
 	    ( $cmd_log ) &&  print CMD_LOG "$command\n";
-	    (system $command)  
-		&& die "Error:\n$command\nerror";  
+	    (system $command)
+		&& die "Error:\n$command\nerror";
 	}
-	( -e  "../$top_dir/$name.ion.gro" ) || die "Error:\n$command\nerror";  
+	( -e  "../$top_dir/$name.ion.gro" ) || die "Error:\n$command\nerror";
 	error_state_check ( "$log", ("turning of free energy, will use lambda=0"));
 	print "\t\t added $charge $ion_name \n";
 
@@ -606,8 +605,8 @@ if (!  -e  $file) {
 	# grompping
 	( $cmd_log ) &&  print CMD_LOG "$command\n";
 	(system $command)
-	    && die "Error:\n$command\nerror"; 
-	
+	    && die "Error:\n$command\nerror";
+
 
 	#genion
 	$program = "$gromacs_path/genion";
@@ -624,9 +623,9 @@ if (!  -e  $file) {
     } else {
 	$input_system_for_md = "$name.water.gro";
     }
-    
-} else { 
-    print "\t $file found\n"; 
+
+} else {
+    print "\t $file found\n";
     if ( -e  "../$top_dir/$name.ion.gro" ) {
 	$input_system_for_md = "../$top_dir/$name.ion.gro";
     } elsif  ( -e  "../$top_dir/$name.water.gro" ) {
@@ -634,7 +633,7 @@ if (!  -e  $file) {
     } else {
 	die "Error: neither $name.ion.gro nor $name.water.gro found in $top_dir.\n";
     }
-} 
+}
 
 
 
@@ -648,7 +647,7 @@ if (!  -e  $file) {
     $command = "$program -s $name.em_input.tpr -c $name.em_out.gro -o $name.em_out.trr > $log  2>&1";
     ( $cmd_log ) &&  print CMD_LOG "$command\n";
     (system $command)
-	&& die "Error:\n$command\nerror"; 
+	&& die "Error:\n$command\nerror";
     error_state_check ( "$log", ("masses will be determined based on residue and atom names"));
     $ret = `grep \'Steepest Descents converged\' $log`;
     if ( ! $ret ) {
@@ -656,9 +655,9 @@ if (!  -e  $file) {
 	#exit (1);
     }
     #`rm  $name.em_out.trr`;
-  
+
 } else {
-    print "\t $file found\n"; 
+    print "\t $file found\n";
 }
 
 # minimization - round 2
@@ -679,12 +678,12 @@ if (! -e  $file) {
     ( -e "../$in_dir/groups.ndx" ) && ($command .=  " -n ../$in_dir/groups.ndx ");
     $command 	.= "> $log  2>&1";
    ( $cmd_log ) &&  print CMD_LOG "$command\n";
-    (system $command) 
-	&& die "Error:\n$command\nerror"; 
-     error_state_check ("$log", 
+    (system $command)
+	&& die "Error:\n$command\nerror";
+     error_state_check ("$log",
 			("maxwarn", "defaults to zero instead of generating an error"));
 } else {
-    print "\t $file found\n"; 
+    print "\t $file found\n";
 }
 
 $file = "$name.em_out.gro";
@@ -696,7 +695,7 @@ if (!  -e  $file) {
     $command = "$program -s $name.em_input.tpr -c $name.em_out.gro -o $name.em_out.trr > $log  2>&1";
     ( $cmd_log ) &&  print CMD_LOG "$command\n";
     (system $command)
-	&& die "Error:\n$command\nerror"; 
+	&& die "Error:\n$command\nerror";
     error_state_check ( "$log", ("masses will be determined based on residue and atom names"));
     $ret = `grep \'Low-Memory BFGS Minimizer converged\' $log`;
     if ( ! $ret ) {
@@ -705,14 +704,14 @@ if (!  -e  $file) {
     }
     #`rm  $name.em_out.trr`;
 } else {
-    print "\t $file found\n"; 
+    print "\t $file found\n";
 }
 
 
 $minimization && exit;
 
 
-############################################################################## 
+##############################################################################
 ##############################################################################
 
 
@@ -736,29 +735,29 @@ if (!  -e  $file) {
     $command 	.= "> $log  2>&1";
     ( $cmd_log ) &&  print CMD_LOG "$command\n";
     (system $command )
-	&& die "Error:\n$command\n"; 
-    error_state_check ( "$log", ("maxwarn", 
+	&& die "Error:\n$command\n";
+    error_state_check ( "$log", ("maxwarn",
 				    "defaults to zero instead of generating an error"));
 } else {
-    print "\t $file found\n"; 
+    print "\t $file found\n";
 }
 
 
-# position restrained md 
+# position restrained md
 $file = "$name.pr.gro";
 if (!  -e  $file) {
     $program = "$gromacs_run";
     $log     = "pos_restr_md.log";
     print "\t runnning $program -- NVT equilibration \n";
     $command = "$program -s $name.pr.tpr -o $name.pr.trr -c $name.pr.gro > $log  2>&1";
-    # 
+    #
     ( $cmd_log ) &&  print CMD_LOG "$command\n";
     (system $command)
-	&& die "Error:\n$command\nerror"; 
+	&& die "Error:\n$command\nerror";
     error_state_check ( "$log", ("maxwarn"));
     #`rm $name.pr.trr`;
 } else {
-    print "\t $file found\n"; 
+    print "\t $file found\n";
 }
 
 
@@ -784,29 +783,29 @@ if (!  -e  $file) {
     $command 	.= "> $log  2>&1";
     ( $cmd_log ) &&  print CMD_LOG "$command\n";
     (system $command )
-	&& die "Error:\n$command\n"; 
-    error_state_check ( "$log", ("maxwarn", 
+	&& die "Error:\n$command\n";
+    error_state_check ( "$log", ("maxwarn",
 				    "defaults to zero instead of generating an error"));
 } else {
-    print "\t $file found\n"; 
+    print "\t $file found\n";
 }
 
 
-# position restrained md 
+# position restrained md
 $file = "$name.pr.gro";
 if (!  -e  $file) {
     $program = "$gromacs_run";
     $log     = "pos_restr_md.log";
     print "\t runnning $program -- NPT equilibration \n";
     $command = "$program -s $name.pr.tpr -o $name.pr.trr -c $name.pr.gro > $log  2>&1";
-    # 
+    #
     ( $cmd_log ) &&  print CMD_LOG "$command\n";
     (system $command)
-	&& die "Error:\n$command\nerror"; 
+	&& die "Error:\n$command\nerror";
     error_state_check ( "$log", ("maxwarn"));
     #`rm $name.pr.trr`;
 } else {
-    print "\t $file found\n"; 
+    print "\t $file found\n";
 }
 
 
@@ -832,12 +831,12 @@ if (!  -e  $file) {
     ( -e "../$in_dir/groups.ndx" ) && ($command .=  " -n ../$in_dir/groups.ndx ");
     $command 	.= "> $log  2>&1";
     ( $cmd_log ) &&  print CMD_LOG "$command\n";
-    (system $command) 
-	&& die "Error:\n$command\n"; 
-    error_state_check ( "$log", ("maxwarn", 
+    (system $command)
+	&& die "Error:\n$command\n";
+    error_state_check ( "$log", ("maxwarn",
 				    "defaults to zero instead of generating an error"));
 } else {
-    print "\t $file found\n"; 
+    print "\t $file found\n";
 }
 
 
@@ -847,7 +846,7 @@ if (!  -e  $file) {
 ($remd) && exit;
 
 
-# md 
+# md
 $file = "$name.md.edr";
 if (!  -e  $file) {
     $program = "$gromacs_run";
@@ -857,11 +856,11 @@ if (!  -e  $file) {
 	"  -e $file > $log  2>&1";
     #
     ( $cmd_log ) &&  print CMD_LOG "$command\n";
-    (system $command) 
-	&& die "Error:\n$command\n"; 
+    (system $command)
+	&& die "Error:\n$command\n";
    error_state_check ( "$log", ("maxwarn"));
 } else {
-    print "\t $file found\n"; 
+    print "\t $file found\n";
 }
 
 
@@ -871,22 +870,22 @@ if (!  -e  $file) {
 
 =pod
 $command = "$gromacs_path/trjconv -f  $name.md.trr -o $name.md.xtc";
-system $command 
+system $command
 	|| die "Error:\n$command\nerror";
 `rm $name.md.trr`;
 
 
 $command = "echo 0 | $gromacs_path/trjconv -s $name.md.tpr -f $name.md.xtc -o tmp.pdb ";
-system $command 
+system $command
 	|| die "Error:\n$command\nerror";
 
 $command = "  awk -F\ '\' \'\$14 != \"H\"\' tmp.pdb >  trajectory.pdb";
-system $command 
+system $command
 	|| die "Error:\n$command\nerror";
 
 if ($np) {
     $command = " gzip  trajectory.pdb";
-    system $command 
+    system $command
 	|| die "Error:\n$command\nerror";
 }
 `rm tmp.pdb`;
@@ -915,7 +914,7 @@ sub  error_state_check (@ ) {
     my $serious;
     my $line;
 
-    
+
     $ret = `grep -i error $logfile | grep -v gcq`; # the retarded quote may have the word error in it
     if ( $ret ) {
 	$serious = "";
@@ -935,7 +934,7 @@ sub  error_state_check (@ ) {
     }
 
     $ret = `grep -i warning $logfile`;
- 
+
     if ( $ret ) {
 	$serious = "";
 	@lines = split "\n", $ret;
@@ -952,7 +951,7 @@ sub  error_state_check (@ ) {
 	    #exit (1);
 	}
    }
- 
+
 
 
 }
@@ -965,7 +964,7 @@ sub make_fake_top (@){
 
     open (FAKE, ">$name.top") ||
 	die "Cno $name.top:$!\n";
-    
+
     print FAKE "; topology wrapper written by $0.\n";
     print FAKE "; Include forcefield parameters\n";
     print FAKE "#include  \"$forcefield.ff/forcefield.itp\n";
