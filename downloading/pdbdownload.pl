@@ -17,7 +17,7 @@ if ( -e $ARGV[0]  ) {
 
 use Net::FTP;
 
-$PDB_REPOSITORY = "/////////databases/pdb";
+$PDB_REPOSITORY = "/data/pdb/structures";
 
 (-e $PDB_REPOSITORY) || ($PDB_REPOSITORY = "/Users/ivana/databases/pdbfiles");
 (-e $PDB_REPOSITORY) || die "pdb repository not found.\n";
@@ -32,8 +32,8 @@ foreach $pdbname (@pdbnames) {
 	print "$pdbname.pdb found in $PDB_REPOSITORY\n";
 	next;
     }
-    print $pdbname, " \n"; 
-    
+    print $pdbname, " \n";
+
     $ftp = Net::FTP->new("ftp.wwpdb.org", Debug => 0, Passive=> 1)
 	or die "Cannot connect to ftp.wwpdb.org: $@";
 
@@ -46,10 +46,10 @@ foreach $pdbname (@pdbnames) {
     $ftp->get("pdb$pdbname.ent.gz")
         or die "get failed ", $ftp->message;
 
-    system ( "gunzip pdb$pdbname.ent.gz" ) && 
+    system ( "gunzip pdb$pdbname.ent.gz" ) &&
 	die "error uncompressing pdb$pdbname.ent.gz.\n";
-	
+
     `mv  pdb$pdbname.ent $PDB_REPOSITORY/$pdbname.pdb`;
 
-    print "\t downloaded to $PDB_REPOSITORY \n"; 
+    print "\t downloaded to $PDB_REPOSITORY \n";
 }
