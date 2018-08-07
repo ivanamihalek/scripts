@@ -7,7 +7,7 @@ use IO::Handle;         #autoflush
 ( @ARGV >= 2  ) ||
     die "Usage: $0   <pdb_file>  <residue_list_file>.\n";
 
-($pdbfile, $reslist_fnm)  = @ARGV;	
+($pdbfile, $reslist_fnm)  = @ARGV;
 
 foreach ($pdbfile, $reslist_fnm) {
     -e $_ || die "$_ not found.\n";
@@ -16,7 +16,7 @@ foreach ($pdbfile, $reslist_fnm) {
 
 ##########################################################
 # check the dependencies
-$user_home = "/home/ivanam/";
+$user_home = "/home/ivana/";
 (-e  $user_home)  || ($user_home = "/Users/ivana/");
 (-e  $user_home)  || die "User home directory not found.\n";
 
@@ -42,14 +42,14 @@ $outstr = "";
 $first_model = 1;
 
 while ( <IF> ) {
-    
+
     ####
     # start of a new model
     if ( /^MODEL\s+(\d+)/ ) {
        $model_no = $1;
        $reading  =  1;
        $outstr   = $_;
-   
+
     ####
     # reading ...
     } elsif (  $reading  && (/^ATOM/ || /^HETATM/) ) {
@@ -64,14 +64,14 @@ while ( <IF> ) {
 
 	# special treatment for the first model/frame: just output
 	if ($first_model) {
-	    
+
 	    $first_model = 0;
 
 	    $file = "frame0.pdb";
 	    open ( OF, ">$file") || die "Cno $file: $!.\n";
 	    print OF $outstr;
 	    close OF;
-	    
+
 	    `cp frame0.pdb $out_fnm`;
 
 	# for all other models/frames
@@ -87,7 +87,7 @@ while ( <IF> ) {
 	    `echo MODEL $model_no >> $out_fnm`;
 	    `grep -v REMARK current.rot.pdb >> $out_fnm`;
 	    `echo ENDMDL >> $out_fnm`;
-	    
+
 	}
 	$outstr  = "";
 	$reading = 0;
