@@ -1,0 +1,13 @@
+    chomp  ;
+    @aux = split;
+    print "|-\n"   ;
+    foreach (@aux) {
+	print "| $_\n";
+
+    }
+}
+print "|}\n";
+
+
+
+close IF;
