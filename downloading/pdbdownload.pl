@@ -19,7 +19,7 @@ use Net::FTP;
 
 $PDB_REPOSITORY = "/data/pdb/structures";
 
-(-e $PDB_REPOSITORY) || ($PDB_REPOSITORY = "/Users/ivana/databases/pdbfiles");
+(-e $PDB_REPOSITORY) || ($PDB_REPOSITORY = "/storage/databases/pdb/structures/");
 (-e $PDB_REPOSITORY) || die "pdb repository not found.\n";
 
 
