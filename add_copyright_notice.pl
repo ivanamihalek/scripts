@@ -11,13 +11,12 @@ open (IF, "<$filename" )
 open (OF, ">tmp_tmp") ||
     die  "Cno tmp_tmp: $!.\n";
 
-$line_ct = 0;
+$line_ct = 1;
 while ( <IF> ) {
     print OF;
     if ($line_ct == $lineno) {
 	$ret =   `cat $cptxt`;
 	print OF $ret;
-	print OF;
     }
     $line_ct ++;
 }
