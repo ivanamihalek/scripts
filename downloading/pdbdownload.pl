@@ -1,55 +1,48 @@
-#! /usr/bin/perl -w -I/home/i/imihalek/perlscr
+#! /usr/bin/perl
 # Ivana, Dec 2001
 # make pdbfiles directory  and download the pdbfiles
 # for proteins with names piped in
 
-defined ( $ARGV[0] ) ||
-    die "Usage: pdbdownload.pl <pdbname>.\n";
+use strict;
+use warnings FATAL => 'all';
 
-@pdbnames = ();
+
+defined ( $ARGV[0] &&  $ARGV[1]) ||
+    die "Usage: pdbdownload.pl  <storage dir>  <pdbname>|<file with pdbnames>.\n";
+
+my $storage_dir = shift @ARGV;
+if (! -d   $storage_dir) {
+    print "$storage_dir not found or does not exist\n";
+    exit (1);
+}
+
+my @pdbnames = ();
 if ( -e $ARGV[0]  ) {
     @pdbnames = split "\n", `cat $ARGV[0]`;
-
 } else {
     push @pdbnames, $ARGV[0];
 }
 
-
-use Net::FTP;
-
-$PDB_REPOSITORY = "/data/pdb/structures";
-
-(-e $PDB_REPOSITORY) || ($PDB_REPOSITORY = "/storage/databases/pdb/structures/");
-(-e $PDB_REPOSITORY) || die "pdb repository not found.\n";
-
-
-foreach $pdbname (@pdbnames) {
+foreach my $pdbname (@pdbnames) {
 
     $pdbname =~ s/\s//g;
-    @aux  = split ('\.', $pdbname); # get rid of extension
+    my @aux  = split ('\.', $pdbname); # get rid of extension
     $pdbname =  lc substr ($aux[0], 0, 4);
-    if (  -e "$PDB_REPOSITORY/$pdbname.pdb" ) {
-	print "$pdbname.pdb found in $PDB_REPOSITORY\n";
-	next;
+    if (-e "$storage_dir/$pdbname.pdb" ) {
+        print "$pdbname.pdb found in $storage_dir\n";
+        next;
     }
     print $pdbname, " \n";
 
-    $ftp = Net::FTP->new("ftp.wwpdb.org", Debug => 0, Passive=> 1)
-	or die "Cannot connect to ftp.wwpdb.org: $@";
+    my $url = "http://www.pdb.org/pdb/download/downloadFile.do?fileFormat=pdb&structureId=$pdbname";
+    system("wget '$url' -O $pdbname.pdb");
+    print "\t downloaded $pdbname.pdb\n";
 
-    $ftp->login("anonymous",'-anonymous@')
-	or die "Cannot login ", $ftp->message;
+    # system ( "gunzip $pdbname.pdb.gz" ) &&
+    #     die "error uncompressing  $pdbname.pdb.gz.\n";
+    # print "\t uncompressed $pdbname.pdb.gz\n";
 
-    $ftp->cwd("/pub/pdb/data/structures/all/pdb")
-	or die "Cannot change working directory ", $ftp->message;
-    $ftp->binary;
-    $ftp->get("pdb$pdbname.ent.gz")
-        or die "get failed ", $ftp->message;
+    `mv  $pdbname.pdb $storage_dir/$pdbname.pdb`;
 
-    system ( "gunzip pdb$pdbname.ent.gz" ) &&
-	die "error uncompressing pdb$pdbname.ent.gz.\n";
-
-    `mv  pdb$pdbname.ent $PDB_REPOSITORY/$pdbname.pdb`;
-
-    print "\t downloaded to $PDB_REPOSITORY \n";
+    print "\t moved $pdbname.pdb to $storage_dir \n";
 }

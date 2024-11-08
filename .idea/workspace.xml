@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="77911693-7afe-46a0-be5c-3cf919cbfb35" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Simple.pm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Status.pm" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/add_copyright_notice.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/align_by_struct.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/align_by_struct_2.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/align_w_struct.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/alloc_check.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assemble.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/basic_blast.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/basic_naccess.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bkp_runsal.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/blast_best_covered_region.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cds_entry_info.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ce_old.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/central_limit_thm.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cleanup_mol2.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/codon_usage.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/combined_analyzer.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/compare_tails.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/comparespecies.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cont_mat_ligand.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cont_order.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/coordbox.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/count_ratio.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/date_snoop.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbquery.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/descr_kwds.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dna_entropy.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dna_mi.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dna_prot_compare.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dnaalmt_from_prot.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dotct.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/downloading/pdbdownload.pl" beforeDir="false" afterPath="$PROJECT_DIR$/downloading/pdbdownload.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/duplicate_check.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/efetch.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/egquery.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/endnote_format.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/etcrunhack.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/extr_uniprot_ids.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fake_codon_tr_prob.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/find_dna_motif.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/find_min.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/find_seq_motif.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/find_tm.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/find_unique_seqs.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/finddif.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/findspecies.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ftp_example.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/generic_start.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/geom_info.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gi_tax_descr.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gnuplot_boxfill.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gnuplot_ranks.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hack_ncbi_taxonomy.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hash_sort_by_value.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hbparse.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/histogram.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/id_translator.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ideal_helix.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/insertct.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ivach.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lowercase.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mafft_profile_almt.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/map_etc_to_struct.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/matchZSVsRMS.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/multiple_genome_mut_best.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/multiple_profile.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/multiplot.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/muscle_profile_almt.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ncbi_tax_root_to_leaf.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/next_packager.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/noc.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/orth_test.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/overlap_at_coverage.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pairwise_comparison.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/percent.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/process_blast.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/process_blosum_freqs.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/process_ce_output.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/process_descr.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/profile_alignment.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/programmer.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pymol_clust.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/questions.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rankhack.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ranks_energy.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ranks_process_generic.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ranks_to_coverage.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ref_by_keyword.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reform_swissprot.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/remove_id_msf.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/remove_seq_from_msf.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rename.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rename_and_align.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rename_and_align_profile.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rename_any.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/report_maker.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/residue_group_compare.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rho_sort.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rmsd.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runsal.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/saccharine.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/score_ligand_position.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/score_pp_config.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sendmail.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/seq_name_transl_table.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/serial_aa_nt_compare.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/serial_blast.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/serial_etc.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/serial_etc_for_hssp.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/serial_modeller.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/serial_next_packager.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/serial_postprocessor.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/simple_noc.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sort_names_into_tax_groups.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/spearman.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec_intersection.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/species.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssz_gifs.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statson.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/strip_digits.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/strip_html.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/struct_long_postprocess.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/subtree_process.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/suggest_mutations.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sumhack.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/table_maker.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tagreplace.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tax_compare.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/taxonomy_stats.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/testopt.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/trace_area.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/two_seq_analysis.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uniprot_ID_descr.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uniprot_seq.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uppercase.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/var_ID_descr.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vast_check.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/weighted_spearman.pl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zavrzlamator.pl" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 6
+}]]></component>
+  <component name="ProjectId" id="2oZ5QqvdNbc6Rm3mtp4IMaKZtVm" />
+  <component name="ProjectViewState">
+    <option name="foldersAlwaysOnTop" value="false" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "settings.editor.selected.configurable": "PERL5_MAIN_SETTINGS"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-0e3be3396995-c546a90a8094-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-242.23339.19" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="77911693-7afe-46a0-be5c-3cf919cbfb35" name="Changes" comment="" />
+      <created>1731064243536</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1731064243536</updated>
+    </task>
+    <servers />
+  </component>
+</project>
