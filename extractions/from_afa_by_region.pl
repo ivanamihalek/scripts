@@ -1,11 +1,13 @@
 #! /usr/bin/perl -w
-use IO::Handle;         #autoflush
+use strict;
+use warnings;
+use IO::Handle; #autoflush
 # takes a single seq in fasta format
 
 sub formatted_sequence ( @);
 sub process_seq ( @);
 
-( @ARGV >= 3 ) || 
+( @ARGV >= 3 ) ||
     die "Usage: $0  <afa file>  <begin> <end>.\n";
 
 $file     = shift @ARGV;
@@ -19,14 +21,14 @@ $reading = 0;
 while ( <IF> ) {
     next if ( !/\S/ );
     if ( /^>(.+)\// ) {
-	( $seq ) && process_seq ($seq);
-	$seq = "";
-	$name = $1;
+        ( $seq ) && process_seq ($seq);
+        $seq = "";
+        $name = $1;
     } else {
-	chomp;
-	$line = $_;
-	$line =~ s/\s//g;
-	$seq .= $line;
+        chomp;
+        $line = $_;
+        $line =~ s/\s//g;
+        $seq .= $line;
     }
 
 }
@@ -41,14 +43,14 @@ sub process_seq ( @) {
     my $first = 1;
 
     while( ($begin, $end) = each(%ranges)) {
-	if ( $first ) {
-	    $first = 0;
-	} else {
-	    $subseq .= "---";
-	}
-	$subseq .= substr $seq, ($begin-1), ($end-$begin+1);
+        if ( $first ) {
+            $first = 0;
+        } else {
+            $subseq .= "---";
+        }
+        $subseq .= substr $seq, ($begin-1), ($end-$begin+1);
     }
-    
+
     print ">$name\n";
     print formatted_sequence($subseq  );
     print "\n";
@@ -57,14 +59,14 @@ sub process_seq ( @) {
 ######################################################
 sub formatted_sequence ( @) {
 
-    my $ctr, 
-    my $sequence = $_[0];
+    my $ctr,
+        my $sequence = $_[0];
     ( defined $sequence) || die "Error: Undefined sequence in formatted_sequence()";
     $ctr = 50;
-    while ( $ctr < length $sequence ) { 
-	substr ($sequence, $ctr, 0) = "\n";
-	$ctr += 51; 
-    } 
-    
-    return $sequence; 
+    while ( $ctr < length $sequence ) {
+        substr ($sequence, $ctr, 0) = "\n";
+        $ctr += 51;
+    }
+
+    return $sequence;
 } 
