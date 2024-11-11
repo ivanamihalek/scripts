@@ -4,29 +4,15 @@ use IO::Handle;         #autoflush
 
  
 defined $ARGV[1]  ||
-    die "Usage: remove_id_msf.pl  <msf_file_name>  <protected_sequence or list_file_name>  [<id cutoff>].\n"; 
+    die "Usage: restrict_msf_to_query.pl  <msf_file_name>  <protected sequence> [<id cutoff>].\n"; 
 
 
 $msf   =  $ARGV[0];
-
 $query_name =  $ARGV[1];
-@query_names = ();
-if ( -e $query_name ) {
-    open IF, "<$query_name" || die "Cno $query_name.\n";
-    while ( <IF> ) {
-	chomp; @aux = split;
-	push @query_names, $aux[0];
-    }
-} else {
-    push @query_names, $query_name
-}
-#print "  @query_names \n";
+
 
 $cutoff = 0.98;
 ( defined $ARGV[2] ) &&  ($cutoff = $ARGV[2]);
-
-%sequence = ();
-@names = ();
 
 open ( MSF, "<$msf") ||
     die "Cno $msf: $!\n";
@@ -36,6 +22,7 @@ while ( <MSF> ) {
     last if ( /\/\//);
 }
 
+%sequence = ();
 do {
     if ( /\w/ ) {
 	@aux = split;
@@ -45,28 +32,24 @@ do {
 	    $sequence{$name} .= $aux_str;
 	} else {
 	    $sequence{$name}  = $aux_str;
-	    push @names, $name;
 	}
 		
     } 
-} while (<MSF>);
+} while ( <MSF>);
 
 
 # turn the msf into a table (first index= sequence, 2nd index= position)
 $query_seq = -1;
 $seq = 0;
-@query_seqs = ();
-foreach $name ( @names) {
+foreach $name ( keys %sequence ) {
     @aux = split '', $sequence{$name};
     foreach $pos ( 0 .. $#aux ) {
 	$array[$seq][$pos] = $aux[$pos];
     }
     $names[$seq] = $name;
-    foreach $query_name ( @query_names ) {
-	if ( $name eq $query_name ) {
-	    push @query_seqs, $seq;
-	    $query_seq++;
-	    last;
+    if ( defined $query_name ) {
+	if ( $name =~ $query_name && $query_name =~ $name) {
+	    $query_seq = $seq;
 	}
     }
     $seq++;
@@ -74,7 +57,7 @@ foreach $name ( @names) {
 }
 
 if ( $query_seq < 0) {
-    die "No query   name not found in the almt $msf\n"; 
+    die "$query_name  name not found in the almt $msf\n"; 
 }
 
 $no_seqs = $seq;   # number of seqs
@@ -82,7 +65,7 @@ $max_seq = $seq-1; # max index a seq can have
 $max_pos = $#aux;  # max index a position can have
 
 # sanity check:
-$no_seqs || die "Error in remove_id_msf.pl: no seqs found.\n"; 
+$no_seqs || die "Error in sift.pl: no seqs found.\n"; 
 
 # remove identical seqs
 for $seq1 ( 0 .. $no_seqs-1){
@@ -100,13 +83,9 @@ for $seq1 ( 0 .. $no_seqs-2){
     }
     for $seq2 ( $seq1+1 .. $no_seqs-1) {
 	next if ( $delete [$seq2]);
-	next if ( (grep {$seq1 == $_ } @query_seqs ) &&  (grep {$seq2 == $_ } @query_seqs) );
 	$len2 = 0;
 	$common = 0;
 	for $pos ( 0 .. $max_pos-1) {
-	    if ( ! defined $array[$seq2][$pos]  ) {
-		exit;
-	    }
 	    ($array[$seq2][$pos] eq '.' ) || $len2++;
 	}
 	if ( ! $len2 ) {
@@ -121,14 +100,14 @@ for $seq1 ( 0 .. $no_seqs-2){
 	    }
 	}
 	if ( $len1 <= $len2  && $common/$len1 >= $cutoff) {
-	    if ( grep {$seq1 == $_ } @query_seqs  ) {
+	    if ( $seq1==$query_seq ) {
 		$delete[$seq2] = 1;
 	    } else {
 		$delete[$seq1] = 1;
 	    }
 	   
 	} elsif (  $len2 <= $len1  && $common/$len2 >= $cutoff) {
-	    if ( grep {$seq2 == $_ } @query_seqs  ) {
+	    if ( $seq2==$query_seq ) {
 		$delete[$seq1] = 1;
 	    } else {
 		$delete[$seq2] = 1;
@@ -140,6 +119,7 @@ for $seq1 ( 0 .. $no_seqs-2){
 
 
 @aux = split '\.', $msf;
+#$newmsf = (join '.',  @aux[0.. $#aux-1]).'.pruned.'.$aux[$#aux];
 $new_length = $max_pos + 1;
 
 

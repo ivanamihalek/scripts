@@ -5,6 +5,29 @@
 while (<STDIN>) {
     next if ( !/\S/);
     if (0) {
+    } elsif ( />.+\|(.+?)\|/ ) { # for ncbi nonredundant
+	$name = $1;
+	if ( /\[(.+?)\]/) {
+	    $sci_name = $1;
+	    $sci_name =~ s/\(.*\)//g;
+	    @aux = split " ", $sci_name;
+	    # @short = map {substr $_, 0, 3}  @aux;
+	    # $spec = uc join "_",  @short[0..1];
+	    push @aux, $name;
+	    $name = join( "_", @aux);
+	}
+	print ">$name\n";
+    } elsif ( />([XN]P_\d+)/ ) { # for refseq
+	$name = $1;
+	if ( /\[(.+?)\]/) {
+	    $sci_name = $1;
+	    $sci_name =~ s/\(.*\)//g;
+	    @aux = split " ", $sci_name;
+	    @short = map {substr $_, 0, 3}  @aux;
+	    $spec = uc join "_",  @short[0..1];
+	    $name = $spec."_".$name;
+	}
+	print ">$name\n";
     } elsif ( />\w*\:([\w\.]+)\s*/ ) { # yeast genomes
 	print ">$1\n";
     } elsif ( />.*\|.*\|(\w+?)\s/ ) { # for second name in uniprot
@@ -18,17 +41,6 @@ while (<STDIN>) {
     } elsif ( />\s*gi\|(\d+)\|/ ) { # for gi names
 	$name = $1;
 	if ( /\[(.+)\]/) {
-	    $sci_name = $1;
-	    $sci_name =~ s/\(.*\)//g;
-	    @aux = split " ", $sci_name;
-	    @short = map {substr $_, 0, 3}  @aux;
-	    $spec = uc join "_",  @short[0..1];
-	    $name = $spec."_".$name;
-	}
-	print ">$name\n";
-    } elsif ( />([XN]P_\d+)/ ) { # forrefseq
-	$name = $1;
-	if ( /\[(.+?)\]/) {
 	    $sci_name = $1;
 	    $sci_name =~ s/\(.*\)//g;
 	    @aux = split " ", $sci_name;
